@@ -24,32 +24,36 @@
  *
  * Python-like string formatting for javascript.
  *
- * By default, puts the function _fmt in the global scope.
+ * Puts the factory $getStringFormatter in the global scope.
  *
  * Example usage:
  *
- *   _fmt("Hello, {}", "world");
- *   _fmt("{0:d} in decimal is {0:x} in hexadecimal. ", 32);
- *   _fmt("There are only {0:b} types of people.", 2);
- *   _fmt("Numbers can be padded {:6d}", 123);
- *   _fmt("{0} plus {0} equals {1}", "two", "four");
+ *   fmt("Hello, {}", "world");
+ *   fmt("{0:d} in decimal is {0:x} in hexadecimal. ", 32);
+ *   fmt("There are only {0:b} types of people.", 2);
+ *   fmt("Numbers can be padded {:6d}", 123);
+ *   fmt("{0} plus {0} equals {1}", "two", "four");
  *
  *  Supports a subset of the String.format of python 2
  *  See http://docs.python.org/2/library/string.html for documentation
  *
  * Supported codes:
  *   s - string
+ *   c - char from integer
  *   d - decimal
  *   o - octal
  *   x - hex
  *   X - uppercase hex
+ *   b - binary
  *
  * Dicts are not supported yet
+ *
+ * Know and deliberate differences from python:
+ *   Boolean can be formatted with 's' code, and is also by default.
+ *   In the python implementation, it depends on the formatting string (not only the code)
  */
 
 (function(scope) {
-  var VERBOSE = true;
-  
   function assert(condition, message) {
     if (!condition) {
       throw "Assertion failed " + (message || "assert failed");
@@ -64,13 +68,28 @@
     return str.substr(0, i);
   }
   
+  /**
+   * "b" | "c" | "d" | "e" | "E" | "f" | "F" | "g" | "G" | "n" | "o" | "s" | "x" | "X" | "%"
+   * 
+   * @returns
+   */  
   function strAfter(str, delim) {
     var i = str.indexOf(delim);
     if (i === -1) {
       return null;
     }
     return str.substr(i+delim.length);
-  }  
+  }
+  
+  function isInteger(n) {
+    return Math.round(n) === n;
+  }
+  
+  function assertIsInteger(n, code) {
+    if (Math.round(n) !== n) {
+        throw "Got '" + n + "' of type '" + typeof n + "' but expected an integer" + (code ? " for code '" + code + "'" : "");
+    }
+  }
   
   function paddingIsOK(str) {
     var firstChar;
@@ -116,25 +135,42 @@
   }
   
   /**
-   * Helper function for formatting
-   * 
-   * @param x {Number}
-   * @param padding {String}
-   * @param fn {Function} - converter function
+   * Format 'c'
    */
-  function _numberFormatter(x, padding, fn) {
+  
+  function charFormatter(c, padding) {
+    assertIsInteger(c, 'x');
+    return padLeft(String.fromCharCode(c), parseInt(padding, 10));
+  }
+  
+  /**
+   * Helper function for formatting integers of different base
+   * 
+   * @param x {Number|Boolean}
+   * @param padding {String}
+   * @param base {Integer} - ex 16 for hexadecimal
+   * @param code {String} - for error reporting
+   */
+  function _integerFormatter(x, padding, base, code) {
     var char = "", firstPaddingChar = "", neg = x < 0, hex, len;
-    if (typeof x !== "number") {
-      throw "Need a number to show hex, got '" + x + "' of type " + typeof x;
-    }
-    if (!paddingIsOK(padding)) {
-      throw "Invalid specification '" + padding + "' for 'x' format code";
+    if (typeof x === "boolean") {
+      if (x) {
+        x = 1;
+      } else {
+        x = 0;
+      }
     }
     
+    if (!paddingIsOK(padding)) {
+      throw "Invalid specification '" + padding + "'";
+    }
+
+    assertIsInteger(x, code);
+    
     if (neg) {
-      hex = fn(-x);
+      hex = (-x).toString(base);
     } else {
-      hex = fn(x);
+      hex = x.toString(base);
     }
     if (padding.length > 1) {
       firstPaddingChar = padding.substr(0, 1);
@@ -165,12 +201,7 @@
    * Format 'x'
    */
   function hexFormatter(x, padding) {
-    return _numberFormatter(x, padding, function(x) {
-      if (Math.round(x) !== x) {
-        throw "Can only format integer numbers with 'x' code";
-      }
-      return x.toString(16);
-    });
+    return _integerFormatter(x, padding, 16, 'x');
   }  
   
   
@@ -178,43 +209,28 @@
    * Format 'X'
    */
   function hexFormatterToUpper(x, padding) {
-    return hexFormatter(x, padding).toUpperCase();
+    return _integerFormatter(x, padding, 16, 'X').toUpperCase();
   }
   
   /**
-   * Format 'n'
+   * Format 'd'
    */
-  function decimalFormatter(n, padding) {
-    return _numberFormatter(n, padding, function(i) {
-      if (Math.round(n) !== n) {
-        throw "Can only format integer numbers with 'd' code";
-      }
-      return n.toString(10);
-    });
+  function decimalFormatter(d, padding) {
+    return _integerFormatter(d, padding, 10, 'd');
   }
   
   /**
    * Format 'o'
    */
   function octalFormatter(o, padding) {
-    return _numberFormatter(o, padding, function(i) {
-      if (Math.round(o) !== o) {
-        throw "Can only format integer numbers with 'o' code";
-      }
-      return o.toString(8);
-    });
+    return _integerFormatter(o, padding, 8, 'o');
   }
   
   /**
    * Format 'b'
    */
   function binaryFormatter(b, padding) {
-    return _numberFormatter(b, padding, function(i) {
-      if (Math.round(b) !== b) {
-        throw "Can only format integer numbers with 'b' code";
-      }
-      return b.toString(2);
-    });
+    return _integerFormatter(b, padding, 2, 'b');
   }  
   
   
@@ -224,69 +240,90 @@
       X: hexFormatterToUpper,
       d: decimalFormatter,
       o: octalFormatter,
-      b: binaryFormatter
+      b: binaryFormatter,
+      c: charFormatter
   };
-  /**
-   * "b" | "c" | "d" | "e" | "E" | "f" | "F" | "g" | "G" | "n" | "o" | "s" | "x" | "X" | "%"
-   * 
-   * @returns
-   */
+  
+  
+  function strIsDigits(str) {
+    return Boolean(str.match(/^[0-9]+$/));
+  }
+  
+  function getDefaultFormatterForValue(value) {
+    var type = typeof value;
+    if (type  === "string") {
+      return "s";
+    }
+    if (type === "number") {
+      if (isInteger(value)) {
+        return "d";
+      } else {
+        assert(false, "TODO: implement float default formatter");
+      }
+      
+    }
+    
+    if (type === "boolean") {
+      return "s";
+    }
+    
+    if (type === "object") {
+      return "s";
+    }
+    
+    // Default for all
+    return "s";
+  }
 
   
-  function rePositional(idx) {
-    return new RegExp("\\{(" + idx + "){1}(:{0,1}[^\\}]+){0,1}\\}", "g");
-  }
-  
-  function reSimple() {
-    return new RegExp("\\{(:{0,1}[^\\}]+){0,1}\\}");
-  }
-  
-  function formatSubstitute(subst, spec) {
+  function formatArgument(arg, spec) {
     assert(spec !== undefined, "spec is undefined");
-    var letter = spec.substr(spec.length-1),
-      padding = spec.substr(0, spec.length-1),
-      formatter = FORMATTERS[letter];
-    if (spec === "") {
-      formatter = FORMATTERS.s;
+    var code = spec.substr(spec.length-1), padding, formatter;
+    
+    if (spec === "" || strIsDigits(code)) {
+      padding = spec;
+      code = getDefaultFormatterForValue(arg);
+    } else {
+      padding = spec.substr(0, spec.length-1);
     }
+     
+    formatter = FORMATTERS[code];
     if (!formatter) {
-      throw "Unknown format code '" + spec + "'";
+      throw "Unknown format specification '" + spec + "'";
     }
-    return formatter(subst, padding);
+    return formatter(arg, padding);
   }
    
-  function formatMatch(m, str, subst) {
+  function formatMatch(m, str, arg) {
     var spec, substFormatted;
-    assert(subst !== undefined, "subst is undefined, match is '" + m + "'");
+    assert(arg !== undefined, "arg is undefined, match is '" + m + "'");
     spec = strAfter(m.replace("{", " ").replace("}", ""), ":");
     if (spec) {
-      substFormatted = formatSubstitute(subst, spec);
+      substFormatted = formatArgument(arg, spec);
     } else {
-      substFormatted = subst;
+      substFormatted = arg;
     }
     return str.replace(m, substFormatted);// substFormatted);
   }
   
-  function containsPositional(str) {
-    return Boolean(str.match(new RegExp("\\{([0-9]+){1}(:{0,1}[^\\}]+)\\}", "g")));
-  }
-
-  
   function getPos(str) {
-    var strippedStr = str.replace("{", "").replace("}", ""), strBeforeColon;
-    if (strippedStr.length === 0) {
+    var stripped = str.replace("{", "").replace("}", ""), beforeColon;
+    if (stripped.length === 0) {
        return null;
     }
-    if (strippedStr.indexOf(":") === -1) {
-      return parseInt(strippedStr, 10);
+    if (stripped.indexOf(":") === -1) {
+      return parseInt(stripped, 10);
     }
-    strBeforeColon = strBefore(strippedStr, ":");
-    if (strBeforeColon === null || strBeforeColon.length === 0) {
+    beforeColon = strBefore(stripped, ":");
+    if (beforeColon === null || beforeColon.length === 0) {
       return null;
     }
-    return parseInt(strBeforeColon, 10); 
+    return parseInt(beforeColon, 10); 
   }
-    
+  
+  /**
+   * Entry function
+   */
   function fmt() {
     var str = arguments[0], origStr = str, regexp = new RegExp("{[^}]*}", "g"), havePositional = false, haveSimple = false, matches, pos, i, m;
     matches = str.match(regexp);
@@ -310,7 +347,6 @@
       str = formatMatch(m, str, arguments[pos+1]);
     }
     
-    
     if (haveSimple && (arguments.length - 1) > matches.length) {
         throw "More arguments (" + (arguments.length - 1) + ") than positions (" + matches.length + "), string is '" + origStr + "'";
     }
@@ -318,6 +354,7 @@
     return str;
   }
   
-  scope.getPos = getPos;
-  scope._fmt = fmt;
+  scope.$getStringFormatter = function() {
+    return fmt;
+  };
 })(window);

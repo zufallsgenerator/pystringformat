@@ -1,38 +1,39 @@
-describe("_fmt", function() {
+describe("stringformat", function() {
+  var fmt = $getStringFormatter();
 
   beforeEach(function() {
   });
 
   it("should format simple arguments correctly", function() {
-    expect(_fmt("Hello, {}!", "world")).toEqual("Hello, world!");
-    expect(_fmt("Hello, {} {} {}!", "to", "the", "world")).toEqual("Hello, to the world!");
+    expect(fmt("Hello, {}!", "world")).toEqual("Hello, world!");
+    expect(fmt("Hello, {} {} {}!", "to", "the", "world")).toEqual("Hello, to the world!");
   });
   
   it("should format numbered arguments correctly", function() {
-    expect(_fmt("Hello, {0}!", "world")).toEqual("Hello, world!");
-    expect(_fmt("Sommartider, {0}, {0}, sommartider!", "hej")).toEqual("Sommartider, hej, hej, sommartider!");
-    expect(_fmt("Sommartider, {1}, {0}, sommartider!", "da", "hej")).toEqual("Sommartider, hej, da, sommartider!");
+    expect(fmt("Hello, {0}!", "world")).toEqual("Hello, world!");
+    expect(fmt("Sommartider, {0}, {0}, sommartider!", "hej")).toEqual("Sommartider, hej, hej, sommartider!");
+    expect(fmt("Sommartider, {1}, {0}, sommartider!", "da", "hej")).toEqual("Sommartider, hej, da, sommartider!");
   });
 
   
   it("should format complex arguments correctly", function() {
-    expect(_fmt("Hello, {0:}!", "world")).toEqual("Hello, world!");
-    expect(_fmt("Hello, {0:} {0:s}!", "hej")).toEqual("Hello, hej hej!");
-    expect(_fmt("Hello, {:}!", "world")).toEqual("Hello, world!");
-    expect(_fmt("Hello, {:s}!", "world")).toEqual("Hello, world!");
+    expect(fmt("Hello, {0:}!", "world")).toEqual("Hello, world!");
+    expect(fmt("Hello, {0:} {0:s}!", "hej")).toEqual("Hello, hej hej!");
+    expect(fmt("Hello, {:}!", "world")).toEqual("Hello, world!");
+    expect(fmt("Hello, {:s}!", "world")).toEqual("Hello, world!");
     // Wideness
-    expect(_fmt("'{0:6s}'", "hej")).toEqual("'hej   '");
-    expect(_fmt("'{0:2s}'", "hej")).toEqual("'hej'");
+    expect(fmt("'{0:6s}'", "hej")).toEqual("'hej   '");
+    expect(fmt("'{0:2s}'", "hej")).toEqual("'hej'");
     // Numbers to string, with wideness
-    expect(_fmt("'{:6s}'", "123")).toEqual("'123   '");
-    expect(_fmt("'{0:6s}'", "123")).toEqual("'123   '");
-    expect(_fmt("'{0:6s}','{0:4s}'", "123")).toEqual("'123   ','123 '");
+    expect(fmt("'{:6s}'", "123")).toEqual("'123   '");
+    expect(fmt("'{0:6s}'", "123")).toEqual("'123   '");
+    expect(fmt("'{0:6s}','{0:4s}'", "123")).toEqual("'123   ','123 '");
   });
 
   it("should throw and error when mixing positional and non-positional arguments", function() {
     var errorThrown = false, result = "";
     try {
-      result = _fmt("{1}, {}", "hej", "hello");      
+      result = fmt("{1}, {}", "hej", "hello");      
     } catch(e) {
       errorThrown = true;
     }
@@ -42,7 +43,7 @@ describe("_fmt", function() {
   it("should throw and error when exhausting format codes", function() {
     var errorThrown = false, result = "";
     try {
-      result = _fmt("{}{}{}", "hej");      
+      result = fmt("{}{}{}", "hej");      
     } catch(e) {
       errorThrown = true;
     }
@@ -52,7 +53,7 @@ describe("_fmt", function() {
   it("should throw and error when there are too few format codes", function() {
     var errorThrown = false, res = "";
     try {
-      res = _fmt("{}", "a", "b", "c");
+      res = fmt("{}", "a", "b", "c");
     } catch(e) {
       errorThrown = true;
     }
@@ -62,7 +63,7 @@ describe("_fmt", function() {
   it("should throw and error when there are too few arguments", function() {
     var errorThrown = false, res = "";
     try {
-      res = _fmt("{} {}", "a");
+      res = fmt("{} {}", "a");
     } catch(e) {
       errorThrown = true;
     }
@@ -72,15 +73,15 @@ describe("_fmt", function() {
   
   
   it("should convert to hex correctly", function() {
-    expect(_fmt("{:x}", 16)).toEqual("10");
-    expect(_fmt("{:x}", 10)).toEqual("a");
-    expect(_fmt("{:X}", 10)).toEqual("A");
-    expect(_fmt("{:4X}", 255)).toEqual("  FF");
-    expect(_fmt("{:04X}", 255)).toEqual("00FF");
-    expect(_fmt("{: 5X}", 255)).toEqual("   FF");
-    expect(_fmt("{:+5x}", 254)).toEqual("  +fe");
-    expect(_fmt("{:5x}", -254)).toEqual("  -fe");
-    expect(_fmt("{:+2x}", 65535)).toEqual("+ffff");
+    expect(fmt("{:x}", 16)).toEqual("10");
+    expect(fmt("{:x}", 10)).toEqual("a");
+    expect(fmt("{:X}", 10)).toEqual("A");
+    expect(fmt("{:4X}", 255)).toEqual("  FF");
+    expect(fmt("{:04X}", 255)).toEqual("00FF");
+    expect(fmt("{: 5X}", 255)).toEqual("   FF");
+    expect(fmt("{:+5x}", 254)).toEqual("  +fe");
+    expect(fmt("{:5x}", -254)).toEqual("  -fe");
+    expect(fmt("{:+2x}", 65535)).toEqual("+ffff");
   });  
 
 
@@ -88,7 +89,7 @@ describe("_fmt", function() {
   it("should throw an error when trying to put + in front of a negative number", function() {
     var errorThrown = false;
     try {
-      _fmt("{:+5x}", -254);
+      fmt("{:+5x}", -254);
     } catch(e) {
       errorThrown = true;
     }
@@ -98,7 +99,7 @@ describe("_fmt", function() {
   it("should throw when the hex format code is wrong", function() {
     var errorThrown = false;
     try {
-      _fmt("{:x5x}", 4);
+      fmt("{:x5x}", 4);
     } catch(e) {
       errorThrown = true;
     }
@@ -108,7 +109,7 @@ describe("_fmt", function() {
   it("should throw when the hex format code is decimal", function() {
     var errorThrown = false;
     try {
-      _fmt("{:x}", 15.2);
+      fmt("{:x}", 15.2);
     } catch(e) {
       errorThrown = true;
     }
@@ -116,18 +117,18 @@ describe("_fmt", function() {
   });
 
   it("should format to integer properly", function() {
-    expect(_fmt("{:d}", 16)).toEqual("16");
-    expect(_fmt("{:4d}", 255)).toEqual(" 255");
-    expect(_fmt("{:04d}", 3)).toEqual("0003");
-    expect(_fmt("{: 5d}", 255)).toEqual("  255");
-    expect(_fmt("{:+5d}", 254)).toEqual(" +254");
-    expect(_fmt("{:+2d}", 65535)).toEqual("+65535");
+    expect(fmt("{:d}", 16)).toEqual("16");
+    expect(fmt("{:4d}", 255)).toEqual(" 255");
+    expect(fmt("{:04d}", 3)).toEqual("0003");
+    expect(fmt("{: 5d}", 255)).toEqual("  255");
+    expect(fmt("{:+5d}", 254)).toEqual(" +254");
+    expect(fmt("{:+2d}", 65535)).toEqual("+65535");
   });
   
   it("should throw when the integer format code is decimal", function() {
     var errorThrown = false;
     try {
-      _fmt("{:n}", 15.2);
+      fmt("{:n}", 15.2);
     } catch(e) {
       errorThrown = true;
     }
@@ -135,16 +136,31 @@ describe("_fmt", function() {
   });
   
   it("should format to octal properly", function() {
-    expect(_fmt("{:o}", 16)).toEqual("20");
-    expect(_fmt("{:4o}", 255)).toEqual(" 377");
-    expect(_fmt("{:04o}", 3)).toEqual("0003");
+    expect(fmt("{:o}", 16)).toEqual("20");
+    expect(fmt("{:4o}", 255)).toEqual(" 377");
+    expect(fmt("{:04o}", 3)).toEqual("0003");
   });
   
   it("should format to binary properly", function() {
-    expect(_fmt("{:b}", 2)).toEqual("10");
-    expect(_fmt("{:b}", 255)).toEqual("11111111");
-    expect(_fmt("{:08b}", 3)).toEqual("00000011");
+    expect(fmt("{:b}", 2)).toEqual("10");
+    expect(fmt("{:b}", 255)).toEqual("11111111");
+    expect(fmt("{:08b}", 3)).toEqual("00000011");
   });
   
+  it("should format chars properly", function() {
+    expect(fmt("{:c}", 33)).toEqual("!");
+    expect(fmt("{:4c}", 33)).toEqual("   !");
+  });
+  
+  it("should pick correct default formatters", function() {
+    expect(fmt("{:5d}", 11)).toEqual("   11");
+    expect(fmt("{:4}", 33)).toEqual("  33");
+    expect(fmt("{:4}", "33")).toEqual("33  ");
+    expect(fmt("{:5}", true)).toEqual("true ");
+    expect(fmt("{:5}", false)).toEqual("false");
+    expect(fmt("{:5d}", false)).toEqual("    0");
+    expect(fmt("{:5d}", true)).toEqual("    1");
+  });  
+
   
 });
