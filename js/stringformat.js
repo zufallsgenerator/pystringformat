@@ -52,6 +52,7 @@
  * Dicts are not supported yet
  *
  * Know and deliberate differences from python:
+ *   Without width or format specifiers, all objects are coerced to string by default.
  *   Boolean can be formatted with 's' code, and is also by default.
  *   In the python implementation, it depends on the formatting string (not only the code)
  *   
