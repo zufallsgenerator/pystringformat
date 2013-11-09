@@ -183,6 +183,7 @@ describe("stringformat", function() {
     expect(fmt("{:2.2f}", -1.232)).toEqual("-1.23");
     expect(fmt("{:2.2f}", 1000000000000000000000000000000)).toEqual("1e+30");
     expect(fmt("{: 1.4f}", 1.232)).toEqual(" 1.2320");
+    expect(fmt("{: 1.4f}", Infinity)).toEqual("Infinity");
   });
   
   it("should format percentage properly", function() {

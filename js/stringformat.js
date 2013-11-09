@@ -63,12 +63,19 @@
  */
 
 window.$getStringFormatter = (function() {
-  var FORMATTERS;
+  var DEFAULT_FIXEDPOINT_DIGITS = 6,
+    FORMATTERS;
+  
+  // Helper functions
   
   function assert(condition, message) {
     if (!condition) {
       throw "Assertion failed " + (message || "assert failed");
     }
+  }
+  
+  function isInteger(n) {
+    return Math.round(n) === n;
   }
   
   function strBefore(str, delim) {
@@ -87,17 +94,13 @@ window.$getStringFormatter = (function() {
     return str.substr(i+delim.length);
   }
   
-  function isInteger(n) {
-    return Math.round(n) === n;
-  }
-  
   function assertIsInteger(n, code) {
     if (Math.round(n) !== n) {
         throw "Got '" + n + "' of type '" + typeof n + "' but expected an integer" + (code ? " for code '" + code + "'" : "");
     }
   }
   
-  function paddingIsOK(str) {
+  function isPaddingOK(str) {
     var firstChar;
     if (str === "") {
       return true;
@@ -130,24 +133,6 @@ window.$getStringFormatter = (function() {
     return str;
   }
   
-  /**
-   * Format 's'
-   */
-  function stringFormatter(s, padding) {
-    if (!paddingIsOK(padding)) {
-      throw "Invalid specification '" + padding + "' for 's' format code";
-    }
-    return padRight(String(s), parseInt(padding, 10));
-  }
-  
-  /**
-   * Format 'c'
-   */
-  
-  function charFormatter(c, padding) {
-    assertIsInteger(c, 'x');
-    return padLeft(String.fromCharCode(c), parseInt(padding, 10));
-  }
   
   /**
    * Helper function for formatting integers of different base
@@ -158,7 +143,7 @@ window.$getStringFormatter = (function() {
    * @param code {String} - for error reporting
    */
   function _integerFormatter(x, padding, base, code) {
-    var char = "", firstPaddingChar = "", neg = x < 0, hex, len;
+    var paddingChar = "", firstPaddingChar = "", neg = x < 0, str, len;
     if (typeof x === "boolean") {
       if (x) {
         x = 1;
@@ -167,77 +152,41 @@ window.$getStringFormatter = (function() {
       }
     }
     
-    if (!paddingIsOK(padding)) {
-      throw "Invalid specification '" + padding + "'";
+    if (!isPaddingOK(padding)) {
+      throw "Invalid specification '" + padding + (code ? "' for '" + code + "' format code" : "");
     }
 
     assertIsInteger(x, code);
     
     if (neg) {
-      hex = (-x).toString(base);
+      str = (-x).toString(base);
     } else {
-      hex = x.toString(base);
+      str = x.toString(base);
     }
     if (padding.length > 1) {
       firstPaddingChar = padding.substr(0, 1);
     }
     if (firstPaddingChar === "0") {
-      char = "0";
+      paddingChar = "0";
     }
     if (firstPaddingChar === "+") {
-      hex = "+" + hex;
-      char = " ";
+      str = "+" + str;
+      paddingChar = " ";
     }
     len = parseInt(padding, 10);
     if (neg) {
       if (firstPaddingChar === "+") {
         throw "Invalid specification '" + padding + "' for negative number";
       }
-      if (char === "0") {
-        return "-" + padLeft(hex, len - 1, char);
+      if (paddingChar === "0") {
+        return "-" + padLeft(str, len - 1, paddingChar);
       } else {
-        return padLeft("-" + hex, len, char);
+        return padLeft("-" + str, len, paddingChar);
       }
     } else {
-      return padLeft(hex, len, char);
+      return padLeft(str, len, paddingChar);
     }
   }
-  
-  /**
-   * Format 'x'
-   */
-  function hexFormatter(x, padding) {
-    return _integerFormatter(x, padding, 16, 'x');
-  }  
-  
-  
-  /**
-   * Format 'X'
-   */
-  function hexFormatterToUpper(x, padding) {
-    return _integerFormatter(x, padding, 16, 'X').toUpperCase();
-  }
-  
-  /**
-   * Format 'd'
-   */
-  function decimalFormatter(d, padding) {
-    return _integerFormatter(d, padding, 10, 'd');
-  }
-  
-  /**
-   * Format 'o'
-   */
-  function octalFormatter(o, padding) {
-    return _integerFormatter(o, padding, 8, 'o');
-  }
-  
-  /**
-   * Format 'b'
-   */
-  function binaryFormatter(b, padding) {
-    return _integerFormatter(b, padding, 2, 'b');
-  }  
 
   function _getFixedpointPadding(padding) {
     var strPaddingBefore, strPaddingAfter, paddingBefore, paddingAfter;
@@ -250,7 +199,7 @@ window.$getStringFormatter = (function() {
       strPaddingBefore = padding;
     }
     
-    if (!paddingIsOK(strPaddingBefore)) {
+    if (!isPaddingOK(strPaddingBefore)) {
       throw "Invalid specification '" + padding + "' for 'f' format code";
     }
  
@@ -263,15 +212,12 @@ window.$getStringFormatter = (function() {
     if (strPaddingAfter && strPaddingAfter.length > 0) {
       paddingAfter = parseInt(strPaddingAfter, 10);
     } else {
-      paddingAfter = 6; // Default value
+      paddingAfter = DEFAULT_FIXEDPOINT_DIGITS; // Default value
     }
     
     return [paddingBefore, paddingAfter];
   }
   
-  /**
-   * Format 'b'
-   */
   function fixedpointFormatter(f, padding, ispercentage) {
     var neg = f < 0, paddingChar = null, str, fBefore, fAfter, fTotal, ret;
 
@@ -291,8 +237,8 @@ window.$getStringFormatter = (function() {
     }
     
     if (str.indexOf(".") > -1) {
-      fBefore = strBefore(str,".");
-      fAfter = strAfter(str,".");
+      fBefore = strBefore(str, ".");
+      fAfter = strAfter(str, ".");
     } else {
       fBefore = str;
       fAfter = "";
@@ -342,7 +288,19 @@ window.$getStringFormatter = (function() {
     }    
   }
   
-  function percentFormatter(p, padding) {
+  function stringFormatter(s, padding) {
+    if (!isPaddingOK(padding)) {
+      throw "Invalid specification '" + padding + "' for 's' format code";
+    }
+    return padRight(String(s), parseInt(padding, 10));
+  }
+  
+  function charFormatter(c, padding) {
+    assertIsInteger(c, 'x');
+    return padLeft(String.fromCharCode(c), parseInt(padding, 10));
+  }
+
+  function percentageFormatter(p, padding) {
     if (typeof p !== "number") {
       throw "Can only format numbers with '%' code, got '" + p + "' of type '" + typeof p + "'";
     }
@@ -351,16 +309,17 @@ window.$getStringFormatter = (function() {
   
   FORMATTERS = {
       s: stringFormatter,
-      x: hexFormatter,
-      X: hexFormatterToUpper,
-      d: decimalFormatter,
-      o: octalFormatter,
-      b: binaryFormatter,
+      x: function(x, padding) { return _integerFormatter(x, padding, 16, 'x'); },
+      X: function(x, padding) { return _integerFormatter(x, padding, 16, 'X').toUpperCase(); },
+      d: function(d, padding) { return _integerFormatter(d, padding, 10, 'd'); },
+      o: function(o, padding) { return _integerFormatter(o, padding, 8, 'o'); },
+      b: function(b, padding) { return _integerFormatter(b, padding, 2, 'b'); },
       c: charFormatter,
       f: fixedpointFormatter,
       F: fixedpointFormatter,
-      '%': percentFormatter
-  };
+      '%': percentageFormatter
+    };
+      
   
   function strIsDigits(str) {
     return Boolean(str.match(/^[0-9]+$/));
