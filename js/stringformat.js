@@ -50,6 +50,28 @@
 (function(scope) {
   var VERBOSE = true;
   
+  function assert(condition, message) {
+    if (!condition) {
+      throw "Assertion failed " + (message || "assert failed");
+    }
+  }
+  
+  function strBefore(str, delim) {
+    var i = str.indexOf(delim);
+    if (i === -1) {
+      return null;
+    }
+    return str.substr(0, i);
+  }
+  
+  function strAfter(str, delim) {
+    var i = str.indexOf(delim);
+    if (i === -1) {
+      return null;
+    }
+    return str.substr(i+delim.length);
+  }  
+  
   function paddingIsOK(str) {
     var firstChar;
     if (str === "") {
@@ -209,36 +231,18 @@
    * 
    * @returns
    */
-  function simpleFormatter() {
-    var str = arguments[0], origStr = str, i, r, lastStr;
-    for (i = 1; i < arguments.length; i++) {
-      r = new RegExp("\\{" + (i - 1 ) + "\\}", "g");
-      lastStr = str;
-      if (r.test(str)) {
-        r.lastIndex = 0; // Reset regexp
-        str = str.replace(r, String(arguments[i]));
-      } else {
-        str = str.replace("{}", String(arguments[i]));
-      }
-      if (VERBOSE && lastStr === str) {
-        throw "Too many arguments, too few formatting codes: '" + origStr + "', argument count: " + arguments.length;
-      }
-    }
-    if (VERBOSE && str.replace("{}", "") !== str) {
-      throw "Too few arguments, too many formatting codes: '" + origStr + "', argument count: " + arguments.length;
-    }
-    return str;
+
+  
+  function rePositional(idx) {
+    return new RegExp("\\{(" + idx + "){1}(:{0,1}[^\\}]+){0,1}\\}", "g");
   }
   
-  function regexpIndex(idx) {
-    return new RegExp("\\{(" + idx + "){1}(:{0,1}[^\\}]+)\\}", "g");
-  }
-  
-  function regexpSimple() {
-    return new RegExp("\\{(:{0,1}[^\\}]+)\\}", "g");
+  function reSimple() {
+    return new RegExp("\\{(:{0,1}[^\\}]+){0,1}\\}");
   }
   
   function formatSubstitute(subst, spec) {
+    assert(spec !== undefined, "spec is undefined");
     var letter = spec.substr(spec.length-1),
       padding = spec.substr(0, spec.length-1),
       formatter = FORMATTERS[letter];
@@ -251,37 +255,69 @@
     return formatter(subst, padding);
   }
    
-  function formatMatch(matches, str, subst) {
-    var m, spec, i, substFormatted;
+  function formatMatch(m, str, subst) {
+    var spec, substFormatted;
+    assert(subst !== undefined, "subst is undefined, match is '" + m + "'");
+    spec = strAfter(m.replace("{", " ").replace("}", ""), ":");
+    if (spec) {
+      substFormatted = formatSubstitute(subst, spec);
+    } else {
+      substFormatted = subst;
+    }
+    return str.replace(m, substFormatted);// substFormatted);
+  }
+  
+  function containsPositional(str) {
+    return Boolean(str.match(new RegExp("\\{([0-9]+){1}(:{0,1}[^\\}]+)\\}", "g")));
+  }
+
+  
+  function getPos(str) {
+    var strippedStr = str.replace("{", "").replace("}", ""), strBeforeColon;
+    if (strippedStr.length === 0) {
+       return null;
+    }
+    if (strippedStr.indexOf(":") === -1) {
+      return parseInt(strippedStr, 10);
+    }
+    strBeforeColon = strBefore(strippedStr, ":");
+    if (strBeforeColon === null || strBeforeColon.length === 0) {
+      return null;
+    }
+    return parseInt(strBeforeColon, 10); 
+  }
+    
+  function fmt() {
+    var str = arguments[0], origStr = str, regexp = new RegExp("{[^}]*}", "g"), havePositional = false, haveSimple = false, matches, pos, i, m;
+    matches = str.match(regexp);
+
     for (i=0;i<matches.length;i++) {
       m = matches[i];
-      spec = m.replace("{", "").replace("}", "").split(":")[1];
-      substFormatted = formatSubstitute(subst, spec);
-      str = str.replace(m, substFormatted);
+      pos = getPos(m);
+      if (pos === null) {
+        haveSimple = true;
+        pos = i;
+      } else {
+        havePositional = true;
+      }
+      if (haveSimple && havePositional) {
+        throw 'Cannot mix positional and non-positional arguments for string "' + str + '" (that is, either "{} {}" or "{0} {1}"  but not "{} {1}"';
+      }
+      assert(String(pos) !== "NaN", "pos is NaN, m is '" + m + "'");
+      if (pos >= arguments.length - 1) {
+        throw "Too few arguments for position " + pos + ", '" + m + "', full string '" + origStr + "'";
+      }
+      str = formatMatch(m, str, arguments[pos+1]);
+    }
+    
+    
+    if (haveSimple && (arguments.length - 1) > matches.length) {
+        throw "More arguments (" + (arguments.length - 1) + ") than positions (" + matches.length + "), string is '" + origStr + "'";
     }
     
     return str;
   }
   
-  function fmt() {
-    var str = arguments[0], i, rIndex, rSimple = regexpSimple(), m;
-    if (str.indexOf(":") === -1) {
-      return simpleFormatter.apply(simpleFormatter, arguments);
-    }
-    for (i = 1; i < arguments.length; i++) {
-      rIndex = regexpIndex(i - 1);
-      m = str.match(rIndex);
-      if (m) {
-        str = formatMatch(m, str, arguments[i]);
-      } else {
-        rSimple.lastindex = 0;
-        m = str.match(rSimple);
-        str = formatMatch([m[0]], str, arguments[i]);
-      }
-    }
-
-    return str;
-  }
-  
+  scope.getPos = getPos;
   scope._fmt = fmt;
 })(window);

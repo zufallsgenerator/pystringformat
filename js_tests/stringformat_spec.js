@@ -29,6 +29,16 @@ describe("_fmt", function() {
     expect(_fmt("'{0:6s}','{0:4s}'", "123")).toEqual("'123   ','123 '");
   });
 
+  it("should throw and error when mixing positional and non-positional arguments", function() {
+    var errorThrown = false, result = "";
+    try {
+      result = _fmt("{1}, {}", "hej", "hello");      
+    } catch(e) {
+      errorThrown = true;
+    }
+    expect(errorThrown).toBe(true, 'result is: "' + result + '"');
+  });
+  
   it("should throw and error when exhausting format codes", function() {
     var errorThrown = false, result = "";
     try {
@@ -40,14 +50,26 @@ describe("_fmt", function() {
   });
 
   it("should throw and error when there are too few format codes", function() {
-    var errorThrown = false;
+    var errorThrown = false, res = "";
     try {
-      _fmt("{}", "a", "b", "c");
+      res = _fmt("{}", "a", "b", "c");
     } catch(e) {
       errorThrown = true;
     }
-    expect(errorThrown).toBe(true);
+    expect(errorThrown).toBe(true, "Result is: " + res);
   });
+
+  it("should throw and error when there are too few arguments", function() {
+    var errorThrown = false, res = "";
+    try {
+      res = _fmt("{} {}", "a");
+    } catch(e) {
+      errorThrown = true;
+    }
+    expect(errorThrown).toBe(true, "Result is: " + res);
+  });
+  
+  
   
   it("should convert to hex correctly", function() {
     expect(_fmt("{:x}", 16)).toEqual("10");
