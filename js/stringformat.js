@@ -335,7 +335,7 @@ window.$getStringFormatter = (function() {
       if (isInteger(value)) {
         return "d";
       } else {
-        assert(false, "TODO: implement float default formatter");
+        return "f";
       }
       
     }

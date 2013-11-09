@@ -19,7 +19,6 @@ describe("stringformat", function() {
     expect(fmt("{}", 0)).toBe("0");
     expect(fmt("{}", -42)).toBe("-42");
     expect(fmt("{}", function(){})).toMatch("function");
-    
   });
   
   it("should format numbered arguments correctly", function() {
@@ -173,6 +172,7 @@ describe("stringformat", function() {
     expect(fmt("{:5}", false)).toEqual("false");
     expect(fmt("{:5d}", false)).toEqual("    0");
     expect(fmt("{:5d}", true)).toEqual("    1");
+    expect(fmt("{:5}", 1.23)).toEqual("1.230000");
   });  
 
   it("should throw an error when formatting floating numbers as decimal", function() {
