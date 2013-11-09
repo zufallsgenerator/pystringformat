@@ -1,5 +1,5 @@
 describe("stringformat", function() {
-  var fmt = $getStringFormatter();
+  var fmt = $getStringFormatter({numberseparator: ","});
 
   beforeEach(function() {
   });
@@ -121,6 +121,7 @@ describe("stringformat", function() {
     expect(fmt("{:4d}", 255)).toEqual(" 255");
     expect(fmt("{:04d}", 3)).toEqual("0003");
     expect(fmt("{: 5d}", 255)).toEqual("  255");
+    expect(fmt("{:05d}", 12)).toEqual("00012");
     expect(fmt("{:+5d}", 254)).toEqual(" +254");
     expect(fmt("{:+2d}", 65535)).toEqual("+65535");
   });
@@ -162,5 +163,31 @@ describe("stringformat", function() {
     expect(fmt("{:5d}", true)).toEqual("    1");
   });  
 
+  it("should throw an error when formatting floating numbers as decimal", function() {
+    var errorThrown = false;
+    try {
+      fmt("{:d}", 15.2);
+    } catch(e) {
+      errorThrown = true;
+    }
+    expect(errorThrown).toBe(true);
+  });
+
+  it("should format fixed point correctly", function() {
+    expect(fmt("{:.2f}", 1.232)).toEqual("1.23");
+    expect(fmt("{:.4f}", 1.232)).toEqual("1.2320");
+    expect(fmt("{:10.4f}", 1.232)).toEqual("    1.2320");
+    expect(fmt("{:+10.4f}", 1.232)).toEqual("   +1.2320");
+    expect(fmt("{:10.4f}", -1.232)).toEqual("   -1.2320");
+    expect(fmt("{:2.4f}", -1.232)).toEqual("-1.2320");
+    expect(fmt("{:2.2f}", -1.232)).toEqual("-1.23");
+    expect(fmt("{:2.2f}", 1000000000000000000000000000000)).toEqual("1e+30");
+    expect(fmt("{: 1.4f}", 1.232)).toEqual(" 1.2320");
+  });
+  
+  it("should format percentage properly", function() {
+    expect(fmt("{:8.1%}", 12)).toEqual(" 1200.0%");
+    expect(fmt("{:%}", 0.45)).toEqual("45.000000%");
+  });    
   
 });

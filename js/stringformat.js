@@ -45,15 +45,26 @@
  *   x - hex
  *   X - uppercase hex
  *   b - binary
+ *   f - fixed point
+ *   F - same f
+ *   % - multiply by 100, and show with fixed 'f' format precision
  *
  * Dicts are not supported yet
  *
  * Know and deliberate differences from python:
  *   Boolean can be formatted with 's' code, and is also by default.
  *   In the python implementation, it depends on the formatting string (not only the code)
+ *   
+ *   The 'f' code will at some point switch to exponential representation
+ *
+ *   The 'n' code is left out, because the locale would have to be set explicitly
+ *   The 'g' and 'G' codes are left out, since the semantics don't really make sense for javascript
+ *
  */
 
-(function(scope) {
+window.$getStringFormatter = (function() {
+  var FORMATTERS;
+  
   function assert(condition, message) {
     if (!condition) {
       throw "Assertion failed " + (message || "assert failed");
@@ -67,12 +78,7 @@
     }
     return str.substr(0, i);
   }
-  
-  /**
-   * "b" | "c" | "d" | "e" | "E" | "f" | "F" | "g" | "G" | "n" | "o" | "s" | "x" | "X" | "%"
-   * 
-   * @returns
-   */  
+
   function strAfter(str, delim) {
     var i = str.indexOf(delim);
     if (i === -1) {
@@ -232,18 +238,129 @@
   function binaryFormatter(b, padding) {
     return _integerFormatter(b, padding, 2, 'b');
   }  
+
+  function _getFixedpointPadding(padding) {
+    var strPaddingBefore, strPaddingAfter, paddingBefore, paddingAfter;
+    
+    if (padding.indexOf(".") > -1) {
+      strPaddingBefore = strBefore(padding, ".");
+      strPaddingAfter = strAfter(padding, ".");
+    } else {
+      strPaddingAfter = null;
+      strPaddingBefore = padding;
+    }
+    
+    if (!paddingIsOK(strPaddingBefore)) {
+      throw "Invalid specification '" + padding + "' for 'f' format code";
+    }
+ 
+    if (strPaddingBefore && strPaddingBefore.length > 0) {
+      paddingBefore = parseInt(strPaddingBefore, 10);
+    } else {
+      paddingBefore = 0;
+    }
+    
+    if (strPaddingAfter && strPaddingAfter.length > 0) {
+      paddingAfter = parseInt(strPaddingAfter, 10);
+    } else {
+      paddingAfter = 6; // Default value
+    }
+    
+    return [paddingBefore, paddingAfter];
+  }
   
+  /**
+   * Format 'b'
+   */
+  function fixedpointFormatter(f, padding, ispercentage) {
+    var neg = f < 0, paddingChar = null, str, fBefore, fAfter, fTotal, ret;
+
+    ret = _getFixedpointPadding(padding);
+    len = ret[0];
+    paddingAfter = ret[1];
+    
+    if (neg) {
+      str = (-f).toString(10);
+    } else {
+      str = f.toString(10);
+    }
+    
+    if (str.indexOf("e") > -1) {
+      // Sorry, no can do
+      return f;
+    }
+    
+    if (str.indexOf(".") > -1) {
+      fBefore = strBefore(str,".");
+      fAfter = strAfter(str,".");
+    } else {
+      fBefore = str;
+      fAfter = "";
+    }
+    
+    if (fAfter.length > paddingAfter) {
+      fAfter = fAfter.substr(0, paddingAfter);
+    } else {
+      fAfter = padRight(fAfter, paddingAfter, "0");
+    }
+    
+    if (fAfter) {
+      fTotal = fBefore + "." + fAfter;
+    } else {
+      fTotal = fBefore;
+    }
+    
+    if (paddingAfter > 0 && padding.length > 0) {
+      firstPaddingChar = padding.substr(0, 1);
+    }
+
+    if (firstPaddingChar === "0") {
+      paddingChar = "0";
+    }
+    if (firstPaddingChar === "+") {
+      fTotal = "+" + fTotal;
+      paddingChar = " ";
+    }
+    if (firstPaddingChar === " ") {
+      fTotal = " " + fTotal;
+      paddingChar = " ";
+    }
+    if (ispercentage) {
+      len = len - 1;
+    }
+    if (neg) {
+      if (firstPaddingChar === "+") {
+        throw "Invalid specification '" + padding + "' for negative number";
+      }
+      if (paddingChar === "0") {
+        return "-" + padLeft(fTotal, len - 1, paddingChar);
+      } else {
+        return padLeft("-" + fTotal, len, paddingChar);
+      }
+    } else {
+      return padLeft(fTotal, len, paddingChar);
+    }    
+  }
   
-  var FORMATTERS = {
+  function percentFormatter(p, padding) {
+    if (typeof p !== "number") {
+      throw "Can only format numbers with '%' code, got '" + p + "' of type '" + typeof p + "'";
+    }
+    return fixedpointFormatter(p * 100, padding, true) + "%"; 
+  }
+  
+  FORMATTERS = {
       s: stringFormatter,
       x: hexFormatter,
       X: hexFormatterToUpper,
       d: decimalFormatter,
       o: octalFormatter,
       b: binaryFormatter,
-      c: charFormatter
+      c: charFormatter,
+      f: fixedpointFormatter,
+      F: fixedpointFormatter,
+      '%': percentFormatter
   };
-  
   
   function strIsDigits(str) {
     return Boolean(str.match(/^[0-9]+$/));
@@ -325,7 +442,9 @@
    * Entry function
    */
   function fmt() {
-    var str = arguments[0], origStr = str, regexp = new RegExp("{[^}]*}", "g"), havePositional = false, haveSimple = false, matches, pos, i, m;
+    var str = arguments[0], origStr = str, regexp = new RegExp("{[^}]*}", "g"),
+      havePositional = false, haveSimple = false, matches, pos, i, m;
+    
     matches = str.match(regexp);
 
     for (i=0;i<matches.length;i++) {
@@ -354,7 +473,5 @@
     return str;
   }
   
-  scope.$getStringFormatter = function() {
-    return fmt;
-  };
-})(window);
+  return fmt;
+});
