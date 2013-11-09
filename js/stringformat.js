@@ -231,9 +231,10 @@ window.$getStringFormatter = (function() {
       str = f.toString(10);
     }
     
-    if (str.indexOf("e") > -1) {
+    // Catch 1e+31, Infinity, NaN and so on
+    if (str.match(/[a-zA-Z]+/g)) {
       // Sorry, no can do
-      return f;
+      return str;
     }
     
     if (str.indexOf(".") > -1) {
@@ -372,14 +373,13 @@ window.$getStringFormatter = (function() {
    
   function formatMatch(m, str, arg) {
     var spec, substFormatted;
-    assert(arg !== undefined, "arg is undefined, match is '" + m + "'");
     spec = strAfter(m.replace("{", " ").replace("}", ""), ":");
     if (spec) {
       substFormatted = formatArgument(arg, spec);
     } else {
       substFormatted = arg;
     }
-    return str.replace(m, substFormatted);// substFormatted);
+    return str.replace(m, String(substFormatted));// substFormatted);
   }
   
   function getPos(str) {

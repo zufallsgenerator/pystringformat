@@ -9,12 +9,24 @@ describe("stringformat", function() {
     expect(fmt("Hello, {} {} {}!", "to", "the", "world")).toEqual("Hello, to the world!");
   });
   
+  it("should format all basic objects without format specifier", function() {
+    expect(fmt("{}", null)).toBe("null");
+    expect(fmt("{}", {})).toBe("[object Object]");
+    expect(fmt("{}", [])).toBe("");
+    expect(fmt("{}", [1, 2, 3])).toBe("1,2,3");
+    expect(fmt("{}", true)).toBe("true");
+    expect(fmt("{}", undefined)).toBe("undefined");
+    expect(fmt("{}", 0)).toBe("0");
+    expect(fmt("{}", -42)).toBe("-42");
+    expect(fmt("{}", function(){})).toMatch("function");
+    
+  });
+  
   it("should format numbered arguments correctly", function() {
     expect(fmt("Hello, {0}!", "world")).toEqual("Hello, world!");
     expect(fmt("Sommartider, {0}, {0}, sommartider!", "hej")).toEqual("Sommartider, hej, hej, sommartider!");
     expect(fmt("Sommartider, {1}, {0}, sommartider!", "da", "hej")).toEqual("Sommartider, hej, da, sommartider!");
   });
-
   
   it("should format complex arguments correctly", function() {
     expect(fmt("Hello, {0:}!", "world")).toEqual("Hello, world!");
@@ -184,6 +196,13 @@ describe("stringformat", function() {
     expect(fmt("{:2.2f}", 1000000000000000000000000000000)).toEqual("1e+30");
     expect(fmt("{: 1.4f}", 1.232)).toEqual(" 1.2320");
     expect(fmt("{: 1.4f}", Infinity)).toEqual("Infinity");
+    expect(fmt("{: 1.4f}", NaN)).toEqual("NaN");
+    expect(fmt("{: 1.4f}", 10000000000000000000000000)).toEqual("1e+25");
+  });
+  
+  it("should catch infinity", function() {
+    expect(fmt("{:d}", Infinity)).toEqual("Infinity");
+    expect(fmt("{:10b}", Infinity)).toEqual("  Infinity");
   });
   
   it("should format percentage properly", function() {
