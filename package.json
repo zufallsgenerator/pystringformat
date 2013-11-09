@@ -1,0 +1,17 @@
+{
+  "name": "stringformat.js",
+  "version": "0.0.1",
+  "description": "Python-like string formatting for javascript",
+  "main": "js/stringformat.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "author": "Christer Bystrom",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jasmine": "~0.5.2",
+    "grunt-contrib-jshint": "~0.7.1",
+    "grunt-template-jasmine-requirejs": "~0.1.7"
+  }
+}
