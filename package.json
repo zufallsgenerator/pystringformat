@@ -12,7 +12,7 @@
   "author": "Christer Bystrom",
   "licenses": {
     "type": "MIT",
-    "url": "https://github.com/zufallsgenerator/stringformat/blob/master/LICENSE"
+    "url": "https://github.com/zufallsgenerator/pystringformat/blob/master/LICENSE"
   },
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:zufallsgenerator/stringformat.git"
+    "url": "git@github.com:zufallsgenerator/pystringformat.git"
   },
   "keywords": [
     "string",
