@@ -67,7 +67,9 @@
  *
  */
 
+/*jshint strict: true */
 window.$getStringFormatter = (function() {
+  "use strict";
   var DEFAULT_FIXEDPOINT_DIGITS = 6,
     FORMATTERS;
   
@@ -192,43 +194,59 @@ window.$getStringFormatter = (function() {
       return padLeft(str, len, paddingChar);
     }
   }
-
-  function _getFixedpointPadding(padding) {
-    var strPaddingBefore, strPaddingAfter, paddingBefore, paddingAfter;
-    
-    if (padding.indexOf(".") > -1) {
-      strPaddingBefore = strBefore(padding, ".");
-      strPaddingAfter = strAfter(padding, ".");
+  
+  /**
+   * Split a string by the dot and returns
+   * the integer and fractional part
+   *
+   * @param strNum {String}
+   *
+   * @return {Array}<String> - [integerPart, fractionalPart]
+   */
+  function splitStrNumberByDot(strNum) {
+    if (strNum.indexOf(".") > -1) {
+      return [strBefore(strNum, "."),  strAfter(strNum, ".")];
     } else {
-      strPaddingAfter = null;
-      strPaddingBefore = padding;
+      return [strNum, ""];
     }
+  }
+
+  
+  function _getFixedpointPadding(padding) {
+    var strInt, strFract, intPart, fractPart, ret;
     
-    if (!isPaddingOK(strPaddingBefore)) {
-      throw "Invalid specification '" + padding + "' for 'f' format code";
+    ret = splitStrNumberByDot(padding);
+    strInt = ret[0];
+    strFract = ret[1];
+    
+    if (!isPaddingOK(strInt)) {
+      throw "Invalid specification '" + padding + "'";
     }
  
-    if (strPaddingBefore && strPaddingBefore.length > 0) {
-      paddingBefore = parseInt(strPaddingBefore, 10);
+    if (strInt && strInt.length > 0) {
+      intPart = parseInt(strInt, 10);
     } else {
-      paddingBefore = 0;
+      intPart = 0;
     }
     
-    if (strPaddingAfter && strPaddingAfter.length > 0) {
-      paddingAfter = parseInt(strPaddingAfter, 10);
+    if (strFract && strFract.length > 0) {
+      fractPart = parseInt(strFract, 10);
     } else {
-      paddingAfter = DEFAULT_FIXEDPOINT_DIGITS; // Default value
+      fractPart = DEFAULT_FIXEDPOINT_DIGITS; // Default value
     }
     
-    return [paddingBefore, paddingAfter];
+    return [intPart, fractPart];
   }
   
   function fixedpointFormatter(f, padding, ispercentage) {
-    var neg = f < 0, paddingChar = null, str, fBefore, fAfter, fTotal, ret;
+    var neg = f < 0,
+      paddingChar = null,
+      firstPaddingChar = "",
+      ret, str, intPart, fractPart, strRet, totalLen, numFractionalDigits;
 
     ret = _getFixedpointPadding(padding);
-    len = ret[0];
-    paddingAfter = ret[1];
+    totalLen = ret[0];
+    numFractionalDigits = ret[1];
     
     if (neg) {
       str = (-f).toString(10);
@@ -242,27 +260,23 @@ window.$getStringFormatter = (function() {
       return str;
     }
     
-    if (str.indexOf(".") > -1) {
-      fBefore = strBefore(str, ".");
-      fAfter = strAfter(str, ".");
+    ret = splitStrNumberByDot(str);
+    intPart = ret[0];
+    fractPart = ret[1];
+    
+    if (fractPart.length > numFractionalDigits) {
+      fractPart = fractPart.substr(0, numFractionalDigits);
     } else {
-      fBefore = str;
-      fAfter = "";
+      fractPart = padRight(fractPart, numFractionalDigits, "0");
     }
     
-    if (fAfter.length > paddingAfter) {
-      fAfter = fAfter.substr(0, paddingAfter);
+    if (fractPart) {
+      strRet = intPart + "." + fractPart;
     } else {
-      fAfter = padRight(fAfter, paddingAfter, "0");
+      strRet = intPart;
     }
     
-    if (fAfter) {
-      fTotal = fBefore + "." + fAfter;
-    } else {
-      fTotal = fBefore;
-    }
-    
-    if (paddingAfter > 0 && padding.length > 0) {
+    if (numFractionalDigits > 0 && padding.length > 0) {
       firstPaddingChar = padding.substr(0, 1);
     }
 
@@ -270,27 +284,27 @@ window.$getStringFormatter = (function() {
       paddingChar = "0";
     }
     if (firstPaddingChar === "+") {
-      fTotal = "+" + fTotal;
+      strRet = "+" + strRet;
       paddingChar = " ";
     }
     if (firstPaddingChar === " ") {
-      fTotal = " " + fTotal;
+      strRet = " " + strRet;
       paddingChar = " ";
     }
     if (ispercentage) {
-      len = len - 1;
+      totalLen = totalLen - 1;
     }
     if (neg) {
       if (firstPaddingChar === "+") {
         throw "Invalid specification '" + padding + "' for negative number";
       }
       if (paddingChar === "0") {
-        return "-" + padLeft(fTotal, len - 1, paddingChar);
+        return "-" + padLeft(strRet, totalLen - 1, paddingChar);
       } else {
-        return padLeft("-" + fTotal, len, paddingChar);
+        return padLeft("-" + strRet, totalLen, paddingChar);
       }
     } else {
-      return padLeft(fTotal, len, paddingChar);
+      return padLeft(strRet, totalLen, paddingChar);
     }    
   }
   
