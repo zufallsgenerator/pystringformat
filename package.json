@@ -1,17 +1,32 @@
 {
   "name": "stringformat.js",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Python-like string formatting for javascript",
-  "main": "js/stringformat.js",
+  "main": "./js/stringformat.js",
   "scripts": {
     "test": "grunt test"
   },
   "author": "Christer Bystrom",
-  "license": "MIT",
+  "licenses": {
+    "type": "MIT",
+    "url": "https://github.com/zufallsgenerator/stringformat/blob/master/LICENSE"
+  },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-jasmine": "~0.5.2",
     "grunt-contrib-jshint": "~0.7.1",
     "grunt-template-jasmine-requirejs": "~0.1.7"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zufallsgenerator"
+  },
+  "keywords": [
+    "string",
+    "format",
+    "fmt",
+    "javascript",
+    "python"
+  ],
+  "license": "MIT"
 }
