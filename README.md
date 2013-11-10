@@ -29,14 +29,14 @@ Supported codes:
 * X - uppercase hex
 * b - binary
 * f - fixed point
-* F - same f
+* F - same as f
 * % - multiply by 100, and show with fixed 'f' format precision
 
 
 
-## Know and deliberate differences from python:
+## Know and deliberate differences from Python:
 * Without width or format specifiers, all objects are coerced to string by default.
-* Boolean can be formatted with 's' code, and is also by default.  In the python implementation, it depends on the formatting string (not only the code)
+* Boolean can be formatted with 's' code, and is also by default.  In the Python implementation, it depends on the formatting string (not only the code)
 * The 'f' code will at some point switch to exponential representation
 * The 'n' code is left out, because the locale would have to be set explicitly
 * The 'g' and 'G' codes are left out, since the semantics don't really make sense for javascript
