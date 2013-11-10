@@ -28,11 +28,15 @@
  *
  * Example usage:
  *
+ *   var fmt = $getStringFormatter();  // Get instance
+ *
  *   fmt("Hello, {}", "world");
  *   fmt("{0:d} in decimal is {0:x} in hexadecimal. ", 32);
  *   fmt("There are only {0:b} types of people.", 2);
  *   fmt("Numbers can be padded {:6d}", 123);
  *   fmt("{0} plus {0} equals {1}", "two", "four");
+ *
+ *   For more examples, see the README.me file
  *
  *  Supports a subset of the String.format of python 2
  *  See http://docs.python.org/2/library/string.html for documentation
