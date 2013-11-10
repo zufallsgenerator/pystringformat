@@ -68,7 +68,7 @@
  */
 
 /*jshint strict: true */
-window.$getStringFormatter = (function() {
+(function() {
   "use strict";
   var DEFAULT_FIXEDPOINT_DIGITS = 6,
     FORMATTERS;
@@ -444,5 +444,7 @@ window.$getStringFormatter = (function() {
     return str;
   }
   
-  return fmt;
-});
+  // export module
+  var out = typeof exports != 'undefined' && exports || window;
+  out.stringformat = fmt;
+})();
