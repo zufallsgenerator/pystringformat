@@ -1,13 +1,15 @@
-stringformat 
-============
+pystringformat 
+==============
 
 This library provides Python-like string formatting for javascript.
 
-It puts the factory $getStringFormatter in the global scope.
+Exports the function pystringformat to the global scope if run in a browser,
+or the module pystringformat if run in node.js.
 
 Example usage:
 
-    var fmt = $getStringFormatter(); // Get instance
+    var fmt = pystringformat;  // Bind function method
+    // if node.js: var fmt = require("pystringformat").pystringformat;
     
     fmt("Hello, {}", "world");  // "Hello, world"
     fmt("{0:d} in decimal is {0:x} in hexadecimal. ", 32);  // "32 in decimal is 20 in hexadecimal. "

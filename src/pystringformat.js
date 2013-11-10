@@ -24,7 +24,8 @@
  *
  * Python-like string formatting for javascript.
  *
- * Exports the function pystringformat
+ * Exports the function pystringformat to the global scope if run in a browser,
+ * or the module pystringformat if run in node.js.
  *
  * Example usage:
  *
@@ -450,6 +451,7 @@
   }
   
   // export module
+  
   var out = typeof exports != 'undefined' && exports || window;
   out.pystringformat = fmt;
 })();
