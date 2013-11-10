@@ -1,5 +1,5 @@
 describe("stringformat", function() {
-  var fmt = $getStringFormatter({numberseparator: ","});
+  var fmt = stringformat;
 
   beforeEach(function() {
   });
