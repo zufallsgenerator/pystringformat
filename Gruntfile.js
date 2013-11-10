@@ -4,15 +4,15 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     jasmine : {
-      src : 'js/*.js',
+      src : 'src/**/*.js',
       options : {
-        specs : 'js_tests/**/*.js'
+        specs : 'specs/**/*.js'
       }
     },
     jshint: {
       all: [
         'Gruntfile.js',
-        'js/**/*.js',
+        'src/**/*.js',
         'specs/**/*.js'
       ] 
     }

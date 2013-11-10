@@ -2,12 +2,12 @@
   "name": "stringformat",
   "version": "0.1.0",
   "description": "Python-like string formatting for javascript",
-  "main": "js/stringformat.js",
+  "main": "src/stringformat.js",
   "scripts": {
     "test": "grunt test"
   },
   "directories": {
-    "lib": "js"
+    "lib": "src"
   },
   "author": "Christer Bystrom",
   "licenses": {
@@ -21,8 +21,8 @@
     "grunt-template-jasmine-requirejs": "~0.1.7"
   },
   "repository": {
-    "type": "svn",
-    "url": "https://github.com/zufallsgenerator/stringformat"
+    "type": "git",
+    "url": "git@github.com:zufallsgenerator/stringformat.git"
   },
   "keywords": [
     "string",

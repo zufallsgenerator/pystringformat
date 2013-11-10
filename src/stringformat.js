@@ -448,3 +448,5 @@
   var out = typeof exports != 'undefined' && exports || window;
   out.stringformat = fmt;
 })();
+
+asdf.dsf();
