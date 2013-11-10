@@ -1,11 +1,9 @@
-stringformat
+stringformat 
 ============
 
-Python-like string formatting for javascript
+This library provides Python-like string formatting for javascript.
 
-
-
-Puts the factory $getStringFormatter in the global scope.
+It puts the factory $getStringFormatter in the global scope.
 
 Example usage:
 
@@ -36,7 +34,7 @@ Supported codes:
 
 
 
-Know and deliberate differences from python:
+## Know and deliberate differences from python:
 * Without width or format specifiers, all objects are coerced to string by default.
 * Boolean can be formatted with 's' code, and is also by default.  In the python implementation, it depends on the formatting string (not only the code)
 * The 'f' code will at some point switch to exponential representation
