@@ -24,11 +24,12 @@
  *
  * Python-like string formatting for javascript.
  *
- * Puts the factory $getStringFormatter in the global scope.
+ * Exports the function pystringformat
  *
  * Example usage:
  *
- *   var fmt = $getStringFormatter();  // Get instance
+ *   var fmt = pystringformat;  // Bind function method
+ *   // if node.js: var fmt = require("pystringformat").pystringformat;
  *
  *   fmt("Hello, {}", "world");
  *   fmt("{0:d} in decimal is {0:x} in hexadecimal. ", 32);
@@ -446,7 +447,5 @@
   
   // export module
   var out = typeof exports != 'undefined' && exports || window;
-  out.stringformat = fmt;
+  out.pystringformat = fmt;
 })();
-
-asdf.dsf();

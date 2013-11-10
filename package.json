@@ -2,7 +2,7 @@
   "name": "stringformat",
   "version": "0.1.0",
   "description": "Python-like string formatting for javascript",
-  "main": "src/stringformat.js",
+  "main": "src/pystringformat.js",
   "scripts": {
     "test": "grunt test"
   },

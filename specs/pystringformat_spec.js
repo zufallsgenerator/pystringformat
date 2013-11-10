@@ -1,5 +1,5 @@
-describe("stringformat", function() {
-  var fmt = stringformat;
+describe("pystringformat", function() {
+  var fmt = pystringformat;
 
   beforeEach(function() {
   });
