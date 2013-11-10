@@ -140,7 +140,6 @@ window.$getStringFormatter = (function() {
     return str;
   }
   
-  
   /**
    * Helper function for formatting integers of different base
    * 
@@ -210,7 +209,6 @@ window.$getStringFormatter = (function() {
       return [strNum, ""];
     }
   }
-
   
   function _getFixedpointPadding(padding) {
     var strInt, strFract, intPart, fractPart, ret;
@@ -328,18 +326,17 @@ window.$getStringFormatter = (function() {
   }
   
   FORMATTERS = {
-      s: stringFormatter,
-      x: function(x, padding) { return _integerFormatter(x, padding, 16, 'x'); },
-      X: function(x, padding) { return _integerFormatter(x, padding, 16, 'X').toUpperCase(); },
-      d: function(d, padding) { return _integerFormatter(d, padding, 10, 'd'); },
-      o: function(o, padding) { return _integerFormatter(o, padding, 8, 'o'); },
-      b: function(b, padding) { return _integerFormatter(b, padding, 2, 'b'); },
-      c: charFormatter,
-      f: fixedpointFormatter,
-      F: fixedpointFormatter,
-      '%': percentageFormatter
-    };
-      
+    s: stringFormatter,
+    x: function(x, padding) { return _integerFormatter(x, padding, 16, 'x'); },
+    X: function(x, padding) { return _integerFormatter(x, padding, 16, 'X').toUpperCase(); },
+    d: function(d, padding) { return _integerFormatter(d, padding, 10, 'd'); },
+    o: function(o, padding) { return _integerFormatter(o, padding, 8, 'o'); },
+    b: function(b, padding) { return _integerFormatter(b, padding, 2, 'b'); },
+    c: charFormatter,
+    f: fixedpointFormatter,
+    F: fixedpointFormatter,
+    '%': percentageFormatter
+  };
   
   function strIsDigits(str) {
     return Boolean(str.match(/^[0-9]+$/));
@@ -356,13 +353,10 @@ window.$getStringFormatter = (function() {
       } else {
         return "f";
       }
-      
     }
-    
     if (type === "boolean") {
       return "s";
     }
-    
     if (type === "object") {
       return "s";
     }
@@ -371,7 +365,6 @@ window.$getStringFormatter = (function() {
     return "s";
   }
 
-  
   function formatArgument(arg, spec) {
     assert(spec !== undefined, "spec is undefined");
     var code = spec.substr(spec.length-1), padding, formatter;
