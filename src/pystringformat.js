@@ -416,6 +416,10 @@
   function fmt() {
     var str = arguments[0], origStr = str, regexp = new RegExp("{[^}]*}", "g"),
       havePositional = false, haveSimple = false, matches, pos, i, m;
+      
+    if (arguments.length === 1) {
+        return str;
+    }
     
     matches = str.match(regexp);
 

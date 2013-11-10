@@ -9,6 +9,11 @@ describe("pystringformat", function() {
     expect(fmt("Hello, {} {} {}!", "to", "the", "world")).toEqual("Hello, to the world!");
   });
   
+  it("should accept a string without arguments", function() {
+    expect(fmt("Hello")).toEqual("Hello");
+  });
+  
+  
   it("should format all basic objects without format specifier", function() {
     expect(fmt("{}", null)).toBe("null");
     expect(fmt("{}", {})).toBe("[object Object]");
