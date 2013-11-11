@@ -249,9 +249,9 @@
     numFractionalDigits = ret[1];
     
     if (neg) {
-      str = (-f).toString(10);
+      str = (-f).toFixed(numFractionalDigits);
     } else {
-      str = f.toString(10);
+      str = f.toFixed(numFractionalDigits);
     }
     
     // Catch 1e+31, Infinity, NaN and so on
@@ -263,12 +263,6 @@
     ret = splitStrNumberByDot(str);
     intPart = ret[0];
     fractPart = ret[1];
-    
-    if (fractPart.length > numFractionalDigits) {
-      fractPart = fractPart.substr(0, numFractionalDigits);
-    } else {
-      fractPart = padRight(fractPart, numFractionalDigits, "0");
-    }
     
     if (fractPart) {
       strRet = intPart + "." + fractPart;
