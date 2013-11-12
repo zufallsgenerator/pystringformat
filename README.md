@@ -23,20 +23,20 @@ Supports a subset of the String.format of python 2
 See http://docs.python.org/2/library/string.html for documentation
 
 Supported codes:
-* s - string
-* c - char from integer
-* d - decimal
-* o - octal
-* x - hex
-* X - uppercase hex
-* b - binary
-* f - fixed point
-* F - same as f
-* % - multiply by 100, and show with fixed 'f' format precision
+* s  - string
+* c  - char from integer
+* d  - decimal
+* o  - octal
+* x  - hex
+* X  - uppercase hex
+* b  - binary
+* f  - fixed point
+* F  - same as f
+* %  - multiply by 100, and show with fixed 'f' format precision
 
 
 
-## Know and deliberate differences from Python:
+## Known and deliberate differences from Python:
 * Without width or format specifiers, all objects are coerced to string by default.
 * Boolean can be formatted with 's' code, and is also by default.  In the Python implementation, it depends on the formatting string (not only the code)
 * The 'f' code will at some point switch to exponential representation
