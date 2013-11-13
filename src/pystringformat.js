@@ -455,7 +455,7 @@
    * Entry function
    */
   function fmt() {
-    var str = arguments[0], dict = arguments[1], origStr = str, regexp = new RegExp("{[^}]*}", "g"),
+    var str = arguments[0], dict = arguments[1], regexp = new RegExp("{[^}]*}", "g"),
       matches, i, argType, key;
       
     if (arguments.length === 1) {
