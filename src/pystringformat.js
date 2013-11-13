@@ -34,39 +34,8 @@
  *
  *   fmt("Hello, {}", "world");
  *   fmt("{0:d} in decimal is {0:x} in hexadecimal. ", 32);
- *   fmt("There are only {0:b} types of people.", 2);
- *   fmt("Numbers can be padded {:6d}", 123);
- *   fmt("{0} plus {0} equals {1}", "two", "four");
  *
- *   For more examples, see the README.me file
- *
- *  Supports a subset of the String.format of python 2
- *  See http://docs.python.org/2/library/string.html for documentation
- *
- * Supported codes:
- *   s - string
- *   c - char from integer
- *   d - decimal
- *   o - octal
- *   x - hex
- *   X - uppercase hex
- *   b - binary
- *   f - fixed point
- *   F - same f
- *   % - multiply by 100, and show with fixed 'f' format precision
- *
- * Dicts are not supported yet
- *
- * Know and deliberate differences from python:
- *   Without width or format specifiers, all objects are coerced to string by default.
- *   Boolean can be formatted with 's' code, and is also by default.
- *   In the python implementation, it depends on the formatting string (not only the code)
- *   
- *   The 'f' code will at some point switch to exponential representation
- *
- *   The 'n' code is left out, because the locale would have to be set explicitly
- *   The 'g' and 'G' codes are left out, since the semantics don't really make sense for javascript
- *
+ *   See README.md for more examples
  */
 
 /*jshint strict: true */
@@ -438,11 +407,14 @@
   }
   
   function getByPath(dict, path) {
-    var split = path.split("."), obj = dict, i, key;
+    var  obj = dict, i, key, split, origPath = path;
+    // Remove ending ] and dots
+    path = path.replace(/\]$/, "").replace(/[\[\]]+/g, ".");
+    split = path.split(".");
     for (i=0;i<split.length;i++) {
       key = split[i];
       if (!obj.hasOwnProperty(key)) {
-        throw "Key/path '" + path + "' not in dict";
+        throw "Key/path '" + origPath + "' not in dict ";
       }
       obj = obj[key];
     }

@@ -178,6 +178,7 @@ describe("pystringformat", function() {
   });
   
   it("should handle bracket indexing properly", function() {
+    expect(fmt("{a.x}", {a: {x: 2}})).toEqual("2");
     expect(fmt("{a[x]}", {a: {x: 2}})).toEqual("2");
   });
   
