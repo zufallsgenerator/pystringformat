@@ -173,5 +173,19 @@ describe("pystringformat", function() {
     expect(fmt("{b}-{a}-{b}", {a: 1, b: 2})).toEqual("2-1-2");
   });    
   
+  it("should handle dot paths with dicts properly", function() {
+    expect(fmt("{a.x}", {a: {x: 2}})).toEqual("2");
+  });
+  
+  it("should handle bracket indexing properly", function() {
+    expect(fmt("{a[x]}", {a: {x: 2}})).toEqual("2");
+  });
+  
+  it("should handle mixed indexing properly", function() {
+    expect(fmt("{a.b.1}", {a: {b: [1, 2, 3]}})).toEqual("2");
+    expect(fmt("{a.b[1]}", {a: {b: [1, 2, 3]}})).toEqual("2");
+  });    
+  
+  
   
 });
