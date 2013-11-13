@@ -1,6 +1,6 @@
 {
   "name": "pystringformat",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Python-like string formatting for javascript",
   "main": "src/pystringformat.js",
   "scripts": {
