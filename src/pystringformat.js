@@ -481,7 +481,6 @@
         str = formatMatch(matches[i], str, arguments[getPos(matches[i])+1]);
       }
     }
-    
     if (argType === "dict") {
       if (arguments.length !== 2 || typeof dict !== "object") {
         throw "Using keyword formatting, expected only one argument of type object";
@@ -493,10 +492,6 @@
         }
         str = formatMatch(matches[i], str, dict[key]);
       }
-    }
-    
-    if (argType === "simple" && (arguments.length - 1) > matches.length) {
-        throw "More arguments (" + (arguments.length - 1) + ") than positions (" + matches.length + "), string is '" + origStr + "'";
     }
     
     return str;
