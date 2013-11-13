@@ -70,6 +70,8 @@
  */
 
 /*jshint strict: true */
+/*global window*/
+/*global exports*/
 (function() {
   "use strict";
   var DEFAULT_FIXEDPOINT_DIGITS = 6,
