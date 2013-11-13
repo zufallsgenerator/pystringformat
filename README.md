@@ -53,4 +53,4 @@ If the argument after the format string is one Object it can be used as a dictio
 ## Changelog
 
 ### Version 0.2
-- Dicts are supported
+- A single object can be used as a dictionary
