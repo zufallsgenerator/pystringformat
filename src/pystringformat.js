@@ -437,6 +437,23 @@
     return parseInt(beforeColon, 10);
   }
   
+  function getByPath(dict, path) {
+    var split = path.split("."), obj = dict, i, key;
+    for (i=0;i<split.length;i++) {
+      key = split[i];
+      if (!obj.hasOwnProperty(key)) {
+        throw "Key/path '" + path + "' not in dict";
+      }
+      obj = obj[key];
+    }
+    return obj;
+  }
+  
+  function getValueFromDict(dict, match) {
+    var key = getDictKey(match);
+    return getByPath(dict, key);
+  }
+  
   function getDictKey(str) {
     var stripped = str.replace("{", "").replace("}", ""), beforeColon;
     if (stripped.length === 0) {
@@ -456,7 +473,7 @@
    */
   function fmt() {
     var str = arguments[0], dict = arguments[1], regexp = new RegExp("{[^}]*}", "g"),
-      matches, i, argType, key;
+      matches, i, argType, subst;
       
     if (arguments.length === 1) {
         return str;
@@ -488,11 +505,8 @@
         throw "Using keyword formatting, expected only one argument of type object";
       }
       for (i=0;i<matches.length;i++) {
-        key = getDictKey(matches[i]);
-        if (!dict.hasOwnProperty(key)) {
-          throw "Key '" + key + "' not in dict";
-        }
-        str = formatMatch(matches[i], str, dict[key]);
+        subst = getValueFromDict(dict, matches[i]);
+        str = formatMatch(matches[i], str, subst);
       }
     }
     
