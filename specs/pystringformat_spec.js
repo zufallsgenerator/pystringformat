@@ -1,6 +1,14 @@
 describe("pystringformat", function() {
   var fmt = pystringformat;
 
+  // Test that arguments to fmt throws an error
+  function shouldThrow() {
+    var args = arguments;
+    expect(function() {
+      fmt.apply(args);
+    }).toThrow();
+  }
+  
   beforeEach(function() {
   });
 
@@ -46,44 +54,20 @@ describe("pystringformat", function() {
     expect(fmt("'{0:6s}','{0:4s}'", "123")).toEqual("'123   ','123 '");
   });
 
-  it("should throw and error when mixing positional and non-positional arguments", function() {
-    var errorThrown = false, result = "";
-    try {
-      result = fmt("{1}, {}", "hej", "hello");      
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true, 'result is: "' + result + '"');
+  it("should throw an error when mixing positional and non-positional arguments", function() {
+    shouldThrow("{1}, {}", "hej", "hello");
   });
   
-  it("should throw and error when exhausting format codes", function() {
-    var errorThrown = false, result = "";
-    try {
-      result = fmt("{}{}{}", "hej");      
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true, 'result is: "' + result + '"');
+  it("should throw an error when exhausting format codes", function() {
+    shouldThrow("{}{}{}", "hej");
   });
 
-  it("should throw and error when there are too few format codes", function() {
-    var errorThrown = false, res = "";
-    try {
-      res = fmt("{}", "a", "b", "c");
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true, "Result is: " + res);
+  it("should throw an error when there are too few format codes", function() {
+    shouldThrow("{}", "a", "b", "c");
   });
 
-  it("should throw and error when there are too few arguments", function() {
-    var errorThrown = false, res = "";
-    try {
-      res = fmt("{} {}", "a");
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true, "Result is: " + res);
+  it("should throw an error when there are too few arguments", function() {
+    shouldThrow("{} {}", "a");
   });
   
   
@@ -103,33 +87,15 @@ describe("pystringformat", function() {
 
 
   it("should throw an error when trying to put + in front of a negative number", function() {
-    var errorThrown = false;
-    try {
-      fmt("{:+5x}", -254);
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true);
+    shouldThrow("{:+5x}", -254);
   });
 
   it("should throw when the hex format code is wrong", function() {
-    var errorThrown = false;
-    try {
-      fmt("{:x5x}", 4);
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true);
+    shouldThrow("{:x5x}", 4);
   });
   
   it("should throw when the hex format code is decimal", function() {
-    var errorThrown = false;
-    try {
-      fmt("{:x}", 15.2);
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true);
+    shouldThrow("{:x}", 15.2);
   });
 
   it("should format to integer properly", function() {
@@ -143,13 +109,7 @@ describe("pystringformat", function() {
   });
   
   it("should throw when the integer format code is decimal", function() {
-    var errorThrown = false;
-    try {
-      fmt("{:n}", 15.2);
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true);
+    shouldThrow("{:n}", 15.2);
   });
   
   it("should format to octal properly", function() {
@@ -181,13 +141,7 @@ describe("pystringformat", function() {
   });  
 
   it("should throw an error when formatting floating numbers as decimal", function() {
-    var errorThrown = false;
-    try {
-      fmt("{:d}", 15.2);
-    } catch(e) {
-      errorThrown = true;
-    }
-    expect(errorThrown).toBe(true);
+    shouldThrow("{:d}", 15.2);
   });
 
   it("should format fixed point correctly", function() {
@@ -213,6 +167,11 @@ describe("pystringformat", function() {
   it("should format percentage properly", function() {
     expect(fmt("{:8.1%}", 12)).toEqual(" 1200.0%");
     expect(fmt("{:%}", 0.45)).toEqual("45.000000%");
+  });
+  
+  it("should handle formatting with dicts properly", function() {
+    expect(fmt("{b}-{a}-{b}", {a: 1, b: 2})).toEqual("2-1-2");
   });    
+  
   
 });

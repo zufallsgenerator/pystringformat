@@ -390,54 +390,112 @@
     return str.replace(m, String(substFormatted));// substFormatted);
   }
   
-  function getPos(str) {
+  function getArgTypeFromMatch(match) {
+    var pos = getPosOrDict(match);
+    if (pos === null) {
+      return "simple";
+    } else if (typeof pos === "number") {
+      return "positional";
+    } else if (typeof pos === "string") {
+      return "dict";
+    }
+    assert(false, "typeof argument " + match +  "is something unhandled: " + (typeof pos));
+  }
+  
+  function getPosOrDict(str) {
     var stripped = str.replace("{", "").replace("}", ""), beforeColon;
     if (stripped.length === 0) {
        return null;
     }
     if (stripped.indexOf(":") === -1) {
-      return parseInt(stripped, 10);
+      beforeColon = stripped;
+    } else {
+        beforeColon = strBefore(stripped, ":");
     }
-    beforeColon = strBefore(stripped, ":");
     if (beforeColon === null || beforeColon.length === 0) {
       return null;
     }
-    return parseInt(beforeColon, 10); 
+    if (strIsDigits(beforeColon)) {
+        return parseInt(beforeColon, 10); 
+    }
+    return beforeColon;
   }
+  
+  
+  function getPos(str) {
+    var stripped = str.replace("{", "").replace("}", ""), beforeColon;
+    if (stripped.indexOf(":") === -1) {
+      beforeColon = stripped;
+    } else {
+      beforeColon = strBefore(stripped, ":");
+    }
+    if ((beforeColon || "").length === 0 || !strIsDigits(beforeColon)) {
+        throw 'Expected positional arguments';
+    }
+    return parseInt(beforeColon, 10);
+  }
+  
+  function getDictKey(str) {
+    var stripped = str.replace("{", "").replace("}", ""), beforeColon;
+    if (stripped.length === 0) {
+       return null;
+    }
+    if (stripped.indexOf(":") === -1) {
+      beforeColon = stripped;
+    } else {
+      beforeColon = strBefore(stripped, ":");
+    }
+    return beforeColon;
+  }
+  
   
   /**
    * Entry function
    */
   function fmt() {
-    var str = arguments[0], origStr = str, regexp = new RegExp("{[^}]*}", "g"),
-      havePositional = false, haveSimple = false, matches, pos, i, m;
+    var str = arguments[0], dict = arguments[1], origStr = str, regexp = new RegExp("{[^}]*}", "g"),
+      matches, i, argType, key;
       
     if (arguments.length === 1) {
         return str;
     }
     
     matches = str.match(regexp);
-
-    for (i=0;i<matches.length;i++) {
-      m = matches[i];
-      pos = getPos(m);
-      if (pos === null) {
-        haveSimple = true;
-        pos = i;
-      } else {
-        havePositional = true;
-      }
-      if (haveSimple && havePositional) {
-        throw 'Cannot mix positional and non-positional arguments for string "' + str + '" (that is, either "{} {}" or "{0} {1}"  but not "{} {1}"';
-      }
-      assert(String(pos) !== "NaN", "pos is NaN, m is '" + m + "'");
-      if (pos >= arguments.length - 1) {
-        throw "Too few arguments for position " + pos + ", '" + m + "', full string '" + origStr + "'";
-      }
-      str = formatMatch(m, str, arguments[pos+1]);
+    
+    if (matches.length === 0) {
+        return str;
     }
     
-    if (haveSimple && (arguments.length - 1) > matches.length) {
+    argType = getArgTypeFromMatch(matches[0]);
+    
+    if (argType === "simple") {
+      if (matches.length + 1 > arguments.length) {
+          throw "More format codes than arguments";
+      }
+      for (i=0;i<matches.length;i++) {
+        str = formatMatch(matches[i], str, arguments[i+1]);
+      }
+    }
+    if (argType === "positional") {
+      for (i=0;i<matches.length;i++) {
+        str = formatMatch(matches[i], str, arguments[getPos(matches[i])+1]);
+      }
+    }
+    
+    if (argType === "dict") {
+      if (arguments.length !== 2 || typeof dict !== "object") {
+        throw "Using keyword formatting, expected only one argument of type object";
+      }
+      for (i=0;i<matches.length;i++) {
+        key = getDictKey(matches[i]);
+        if (!dict.hasOwnProperty(key)) {
+          throw "Key '" + key + "' not in dict";
+        }
+        str = formatMatch(matches[i], str, dict[key]);
+      }
+    }
+    
+    if (argType === "simple" && (arguments.length - 1) > matches.length) {
         throw "More arguments (" + (arguments.length - 1) + ") than positions (" + matches.length + "), string is '" + origStr + "'";
     }
     
