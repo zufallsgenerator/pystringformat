@@ -352,7 +352,7 @@
    
   function formatMatch(m, str, arg) {
     var spec, substFormatted;
-    spec = strAfter(m.replace("{", " ").replace("}", ""), ":");
+    spec = strAfter(m.replace("{", "").replace("}", ""), ":");
     if (spec) {
       substFormatted = formatArgument(arg, spec);
     } else {
@@ -445,7 +445,7 @@
    */
   function fmt() {
     var str = arguments[0], dict = arguments[1], regexp = new RegExp("{[^}]*}", "g"),
-      matches, i, argType, subst;
+      matches, token, split = str.split("{"), arr = [split[0]], m, res, i, argType;
       
     if (arguments.length === 1) {
         return str;
@@ -459,31 +459,29 @@
     
     argType = getArgTypeFromMatch(matches[0]);
     
-    if (argType === "simple") {
-      if (matches.length + 1 > arguments.length) {
-          throw "More format codes than arguments";
-      }
-      for (i=0;i<matches.length;i++) {
-        str = formatMatch(matches[i], str, arguments[i+1]);
-      }
-    }
-    if (argType === "positional") {
-      for (i=0;i<matches.length;i++) {
-        str = formatMatch(matches[i], str, arguments[getPos(matches[i])+1]);
-      }
-    }
-    if (argType === "dict") {
-      if (arguments.length !== 2 || typeof dict !== "object") {
-        throw "Using keyword formatting, expected only one argument of type object";
-      }
-      for (i=0;i<matches.length;i++) {
-        subst = getValueFromDict(dict, matches[i]);
-        str = formatMatch(matches[i], str, subst);
-      }
+    if (argType === "dict" && (arguments.length !== 2 || typeof dict !== "object")) {
+      throw "Using keyword formatting, expected only one argument of type object";
     }
     
-    return str;
+    for(i=1;i<split.length;i++) {
+      token = split[i];
+      m = strBefore(token, "}");
+      if (argType === "dict") {
+        res = formatMatch(m, m, getValueFromDict(dict, m));
+      }
+      if (argType === "simple") {
+        res = formatMatch(m, m, arguments[i]);
+      }
+      if (argType === "positional") {
+        res = formatMatch(m, m, arguments[getPos(m) + 1]);
+      }
+      arr.push(res);
+      arr.push(strAfter(token, "}"));
+    }
+    return arr.join("");
   }
+  
+
   
   // export module
   
