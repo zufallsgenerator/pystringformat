@@ -311,7 +311,7 @@
   
   function getDefaultFormatterForValue(value) {
     var type = typeof value;
-    if (type  === "string") {
+    if (type === "boolean" || type === "object" || type === "string") {
       return "s";
     }
     if (type === "number") {
@@ -321,19 +321,12 @@
         return "f";
       }
     }
-    if (type === "boolean") {
-      return "s";
-    }
-    if (type === "object") {
-      return "s";
-    }
-    
+
     // Default for all
     return "s";
   }
 
   function formatArgument(arg, spec) {
-    assert(spec !== undefined, "spec is undefined");
     var code = spec.substr(spec.length-1), padding, formatter;
     
     if (spec === "" || strIsDigits(code)) {
@@ -350,55 +343,33 @@
     return formatter(arg, padding);
   }
    
-  function formatMatch(m, str, arg) {
-    var spec, substFormatted;
-    spec = strAfter(m.replace("{", "").replace("}", ""), ":");
+  function formatMatch(m, arg) {
+    var spec;
+    spec = strAfter(m, ":");
     if (spec) {
-      substFormatted = formatArgument(arg, spec);
+      return formatArgument(arg, spec);
     } else {
-      substFormatted = arg;
+      return String(arg);
     }
-    return str.replace(m, String(substFormatted));// substFormatted);
   }
   
-  function getArgTypeFromMatch(match) {
-    var pos = getPosOrDict(match);
-    if (pos === null) {
-      return "simple";
-    } else if (typeof pos === "number") {
-      return "positional";
-    } else if (typeof pos === "string") {
-      return "dict";
-    }
-    assert(false, "typeof argument " + match +  "is something unhandled: " + (typeof pos));
-  }
-  
-  function getPosOrDict(str) {
-    var stripped = str.replace("{", "").replace("}", ""), beforeColon;
+  function getArgTypeFromMatch(str) {
+    var stripped = str.replace("{", "").replace("}", "").split(":")[0];
     if (stripped.length === 0) {
-       return null;
+       return "simple";
     }
-    if (stripped.indexOf(":") === -1) {
-      beforeColon = stripped;
-    } else {
-        beforeColon = strBefore(stripped, ":");
+    if (strIsDigits(stripped)) {
+        return "pos"; 
     }
-    if (beforeColon === null || beforeColon.length === 0) {
-      return null;
-    }
-    if (strIsDigits(beforeColon)) {
-        return parseInt(beforeColon, 10); 
-    }
-    return beforeColon;
+    return "dict";
   }
-  
   
   function getPos(str) {
-    var stripped = str.replace("{", "").replace("}", ""), beforeColon;
-    if (stripped.indexOf(":") === -1) {
-      beforeColon = stripped;
+    var beforeColon;
+    if (str.indexOf(":") === -1) {
+      beforeColon = str;
     } else {
-      beforeColon = strBefore(stripped, ":");
+      beforeColon = strBefore(str, ":");
     }
     if ((beforeColon || "").length === 0 || !strIsDigits(beforeColon)) {
         throw 'Expected positional arguments';
@@ -427,33 +398,23 @@
   }
   
   function getDictKey(str) {
-    var stripped = str.replace("{", "").replace("}", ""), beforeColon;
-    if (stripped.length === 0) {
-       return null;
-    }
-    if (stripped.indexOf(":") === -1) {
-      beforeColon = stripped;
+    if (str.indexOf(":") === -1) {
+      return str;
     } else {
-      beforeColon = strBefore(stripped, ":");
+      return strBefore(str, ":");
     }
-    return beforeColon;
   }
-  
   
   /**
    * Entry function
    */
   function fmt() {
-    var str = arguments[0], dict = arguments[1], regexp = new RegExp("{[^}]*}", "g"),
+    var str = arguments[0], dict = arguments[1], numArgs = arguments.length - 1, regexp = new RegExp("{[^}]*}", "g"),
       matches, token, split = str.split("{"), arr = [split[0]], m, res, i, argType;
       
-    if (arguments.length === 1) {
-        return str;
-    }
-    
     matches = str.match(regexp);
     
-    if (matches.length === 0) {
+    if ((matches || []).length === 0 && arguments.length === 1) {
         return str;
     }
     
@@ -463,25 +424,27 @@
       throw "Using keyword formatting, expected only one argument of type object";
     }
     
+    if (argType === "simple" && (matches.length > numArgs || matches.length < numArgs)) {
+      throw "More format codes than arguments -> codes {}, arguments {}".replace("{}", matches.length).replace("{}", numArgs);
+    }
+    
     for(i=1;i<split.length;i++) {
       token = split[i];
       m = strBefore(token, "}");
       if (argType === "dict") {
-        res = formatMatch(m, m, getValueFromDict(dict, m));
+        res = formatMatch(m, getValueFromDict(dict, m));
+      }
+      if (argType === "pos") {
+        res = formatMatch(m, arguments[getPos(m) + 1]);
       }
       if (argType === "simple") {
-        res = formatMatch(m, m, arguments[i]);
-      }
-      if (argType === "positional") {
-        res = formatMatch(m, m, arguments[getPos(m) + 1]);
+        res = formatMatch(m, arguments[i]);
       }
       arr.push(res);
       arr.push(strAfter(token, "}"));
     }
     return arr.join("");
   }
-  
-
   
   // export module
   
