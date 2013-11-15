@@ -46,14 +46,6 @@
   var DEFAULT_FIXEDPOINT_DIGITS = 6,
     FORMATTERS;
   
-  // Helper functions
-  
-  function assert(condition, message) {
-    if (!condition) {
-      throw "Assertion failed " + (message || "assert failed");
-    }
-  }
-  
   function isInteger(n) {
     return Math.round(n) === n;
   }
@@ -116,18 +108,18 @@
   /**
    * Helper function for formatting integers of different base
    * 
-   * @param x {Number|Boolean}
+   * @param i {Number|Boolean}
    * @param padding {String}
    * @param base {Integer} - ex 16 for hexadecimal
    * @param code {String} - for error reporting
    */
-  function _integerFormatter(x, padding, base, code) {
-    var paddingChar = "", firstPaddingChar = "", neg = x < 0, str, len;
-    if (typeof x === "boolean") {
-      if (x) {
-        x = 1;
+  function _integerFormatter(i, padding, base, code) {
+    var paddingChar = "", firstPaddingChar = "", neg = i < 0, str, len;
+    if (typeof i === "boolean") {
+      if (i) {
+        i = 1;
       } else {
-        x = 0;
+        i = 0;
       }
     }
     
@@ -135,12 +127,12 @@
       throw "Invalid specification '" + padding + (code ? "' for '" + code + "' format code" : "");
     }
 
-    assertIsInteger(x, code);
+    assertIsInteger(i, code);
     
     if (neg) {
-      str = (-x).toString(base);
+      str = (-i).toString(base);
     } else {
-      str = x.toString(base);
+      str = i.toString(base);
     }
     if (padding.length > 1) {
       firstPaddingChar = padding.substr(0, 1);
@@ -176,11 +168,8 @@
    * @return {Array}<String> - [integerPart, fractionalPart]
    */
   function splitStrNumberByDot(strNum) {
-    if (strNum.indexOf(".") > -1) {
-      return [strBefore(strNum, "."),  strAfter(strNum, ".")];
-    } else {
-      return [strNum, ""];
-    }
+    var split = strNum.split(".");
+    return [split[0], split[1] || ""];
   }
   
   function _getFixedpointPadding(padding) {
@@ -248,12 +237,8 @@
     if (firstPaddingChar === "0") {
       paddingChar = "0";
     }
-    if (firstPaddingChar === "+") {
-      strRet = "+" + strRet;
-      paddingChar = " ";
-    }
-    if (firstPaddingChar === " ") {
-      strRet = " " + strRet;
+    if (firstPaddingChar === "+" || firstPaddingChar === " ") {
+      strRet = firstPaddingChar + strRet;
       paddingChar = " ";
     }
     if (ispercentage) {
@@ -353,29 +338,6 @@
     }
   }
   
-  function getArgTypeFromMatch(str) {
-    var stripped = str.replace("{", "").replace("}", "").split(":")[0];
-    if (stripped.length === 0) {
-       return "simple";
-    }
-    if (strIsDigits(stripped)) {
-        return "pos"; 
-    }
-    return "dict";
-  }
-  
-  function getPos(str) {
-    var beforeColon;
-    if (str.indexOf(":") === -1) {
-      beforeColon = str;
-    } else {
-      beforeColon = strBefore(str, ":");
-    }
-    if ((beforeColon || "").length === 0 || !strIsDigits(beforeColon)) {
-        throw 'Expected positional arguments';
-    }
-    return parseInt(beforeColon, 10);
-  }
   
   function getByPath(dict, path) {
     var  obj = dict, i, key, split, origPath = path;
@@ -393,24 +355,39 @@
   }
   
   function getValueFromDict(dict, match) {
-    var key = getDictKey(match);
-    return getByPath(dict, key);
+    return getByPath(dict, match.split(":")[0]);
   }
   
-  function getDictKey(str) {
-    if (str.indexOf(":") === -1) {
-      return str;
-    } else {
-      return strBefore(str, ":");
+  function getPos(str) {
+    var beforeColon = str.split(":")[0];
+    if (beforeColon.length === 0 || !strIsDigits(beforeColon)) {
+        throw 'Expected positional arguments';
     }
+    return parseInt(beforeColon, 10);
   }
+  
+  function getArgTypeFromMatch(str) {
+    var stripped = str.replace("{", "").replace("}", "").split(":")[0];
+    if (stripped.length === 0) {
+       return "simple";
+    }
+    if (strIsDigits(stripped)) {
+        return "pos"; 
+    }
+    return "dict";
+  }  
   
   /**
    * Entry function
    */
   function fmt() {
-    var str = arguments[0], dict = arguments[1], numArgs = arguments.length - 1, regexp = new RegExp("{[^}]*}", "g"),
-      matches, token, split = str.split("{"), arr = [split[0]], m, res, i, argType;
+    var str = arguments[0],
+      dict = arguments[1],
+      numArgs = arguments.length - 1,
+      regexp = new RegExp("{[^}]*}", "g"),
+      split = str.split("{"),
+      arr = [split[0]],
+      matches, m, tokenSplit, after, i, argType, subst;
       
     matches = str.match(regexp);
     
@@ -429,19 +406,20 @@
     }
     
     for(i=1;i<split.length;i++) {
-      token = split[i];
-      m = strBefore(token, "}");
+      tokenSplit = split[i].split("}");
+      m = tokenSplit[0];
+      after = tokenSplit[1];
       if (argType === "dict") {
-        res = formatMatch(m, getValueFromDict(dict, m));
+        subst = getValueFromDict(dict, m);
       }
       if (argType === "pos") {
-        res = formatMatch(m, arguments[getPos(m) + 1]);
+        subst = arguments[getPos(m) + 1];
       }
       if (argType === "simple") {
-        res = formatMatch(m, arguments[i]);
+        subst = arguments[i];
       }
-      arr.push(res);
-      arr.push(strAfter(token, "}"));
+      arr.push(formatMatch(m, subst));
+      arr.push(after);
     }
     return arr.join("");
   }
