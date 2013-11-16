@@ -29,16 +29,16 @@ Supports a subset of the String.format of python 2
 See http://docs.python.org/2/library/string.html for documentation
 
 Supported codes:
-* s  - string
-* c  - char from integer
-* d  - decimal
-* o  - octal
-* x  - hex
-* X  - uppercase hex
-* b  - binary
-* f  - fixed point
-* F  - same as f
-* %  - multiply by 100, and show with fixed 'f' format precision
+- s - string
+- c - char from integer
+- d - decimal
+- o - octal
+- x - hex
+- X - uppercase hex
+- b - binary
+- f - fixed point
+- F - same as f
+- % - multiply by 100, and show with fixed 'f' format precision
 
 If the argument after the format string is one Object it can be used as a dictionary.
 
@@ -51,6 +51,19 @@ If the argument after the format string is one Object it can be used as a dictio
 * Bracket and dot notations are interchangeable (javascript only has one type of properties)
 
 ## Changelog
+
+### Version 0.2.2
+
+Fixed some cases where having arguments looking like format strings would mess up things.
+Example:
+
+    fmt("{}, {}!", "Hello, {}", "world"); // Should be "Hello, {}, world!"
+
+Heavy refactoring.
+
+### Version 0.2.1
+
+No changes, updated the version number to see an update on npmjs.org
 
 ### Version 0.2
 - A single object can be used as a dictionary
