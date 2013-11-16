@@ -1,0 +1,23 @@
+{
+  "name": "pystringformat",
+  "version": "0.2.2",
+  "description": "Python-like string formatting for javascript",
+  "main": "src/pystringformat.js",
+  "keywords": [
+    "string",
+    "format",
+    "python"
+  ],
+  "authors": [
+    "Christer Bystrom"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/zufallsgenerator/pystringformat",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
