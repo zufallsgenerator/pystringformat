@@ -5,7 +5,7 @@ describe("pystringformat", function() {
   function shouldThrow() {
     var args = arguments;
     expect(function() {
-      fmt.apply(args);
+      fmt.apply(fmt, args);
     }).toThrow();
   }
   
@@ -186,6 +186,19 @@ describe("pystringformat", function() {
     expect(fmt("{a.b.1}", {a: {b: [1, 2, 3]}})).toEqual("2");
     expect(fmt("{a.b[1]}", {a: {b: [1, 2, 3]}})).toEqual("2");
   });    
+  
+  it("should not mess up recursively with simple arguments", function() {
+    expect(fmt("{}, {}!", "Hello, {}", "world")).toEqual("Hello, {}, world!");
+  });
+  
+  it("should not mess up recursively with positional arguments", function() {
+    expect(fmt("{1}{1}{0}", "{2}", "{1}")).toEqual("{1}{1}{2}");
+    expect(fmt("{1}{0}", "{0}{1}", "{0}{1}")).toEqual("{0}{1}{0}{1}");
+  });
+  
+  it("should not mess up recursively with dict", function() {
+    expect(fmt("{a}{b}", {a: "{b}", b: "c"})).toEqual("{b}c");
+  });  
   
   
   
