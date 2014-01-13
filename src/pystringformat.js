@@ -72,6 +72,10 @@
     }
   }
   
+  /**
+   * @param {string} str
+   * @returns {boolean}
+   */
   function isPaddingOK(str) {
     var firstChar;
     if (str === "") {
@@ -88,19 +92,29 @@
     }
     return !str.match(/[^0-9]/);
   }
-  
-  function padRight(str, length, char) {
-    char = char || " ";
+  /**
+   * @param {string} str
+   * @param {number} length
+   * @param {string=} ch
+   * @private
+   */
+  function padRight(str, length, ch) {
+    ch = ch || " ";
     while (str.length < length) {
-      str = str + char;
+      str = str + ch;
     }
     return str;
   }
-  
-  function padLeft(str, length, char) {
-    char = char || " ";
+  /**
+   * @param {string} str
+   * @param {number} length
+   * @param {string=} ch
+   * @private
+   */  
+  function padLeft(str, length, ch) {
+    ch = ch || " ";
     while (str.length < length) {
-      str = char + str;
+      str = ch + str;
     }
     return str;
   }
@@ -108,10 +122,11 @@
   /**
    * Helper function for formatting integers of different base
    * 
-   * @param i {Number|Boolean}
-   * @param padding {String}
-   * @param base {Integer} - ex 16 for hexadecimal
-   * @param code {String} - for error reporting
+   * @param {number|boolean} i 
+   * @param {string} padding 
+   * @param {number} base (integer) - Ex. 16 for hexadecimal 
+   * @param {string} code For error reporting
+   * @private
    */
   function _integerFormatter(i, padding, base, code) {
     var paddingChar = "", firstPaddingChar = "", neg = i < 0, str, len;
@@ -163,7 +178,7 @@
    * Split a string by the dot and returns
    * the integer and fractional part
    *
-   * @param strNum {String}
+   * @param {string} strNum 
    *
    * @return {Array}<String> - [integerPart, fractionalPart]
    */
@@ -200,7 +215,7 @@
   
   function fixedpointFormatter(f, padding, ispercentage) {
     var neg = f < 0,
-      paddingChar = null,
+      paddingChar,
       firstPaddingChar = "",
       ret, str, intPart, fractPart, strRet, totalLen, numFractionalDigits;
 
@@ -338,7 +353,6 @@
     }
   }
   
-  
   function getByPath(dict, path) {
     var  obj = dict, i, key, split, origPath = path;
     // Remove ending ] and dots
@@ -402,7 +416,7 @@
     }
     
     if (argType === "simple" && (matches.length > numArgs || matches.length < numArgs)) {
-      throw "More format codes than arguments -> codes {}, arguments {}".replace("{}", matches.length).replace("{}", numArgs);
+      throw "More format codes than arguments -> codes {}, arguments {}".replace("{}", String(matches.length)).replace("{}", String(numArgs));
     }
     
     for(i=1;i<split.length;i++) {
@@ -427,5 +441,6 @@
   // export module
   
   var out = typeof exports != 'undefined' && exports || window;
+  /** @expose */
   out.pystringformat = fmt;
 })();
