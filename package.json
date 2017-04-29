@@ -1,10 +1,10 @@
 {
   "name": "pystringformat",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Python-like string formatting for javascript",
   "main": "src/pystringformat.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "mocha tests"
   },
   "directories": {
     "lib": "src"
@@ -15,10 +15,8 @@
     "url": "https://github.com/zufallsgenerator/pystringformat/blob/master/LICENSE"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-jasmine": "~0.5.2",
-    "grunt-contrib-jshint": "~0.7.1",
-    "grunt-template-jasmine-requirejs": "~0.1.7"
+    "expect": "^1.20.2",
+    "mocha": "^3.3.0"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
-pystringformat 
+pystringformat
 ==============
 
-Current version: 0.2.x
+Current version: 0.3.x
 
 This library provides Python-like string formatting for javascript.
 
@@ -10,17 +10,18 @@ or the module pystringformat if run in node.js.
 
 Example usage:
 
-    var fmt = pystringformat;  // Bind function method
-    // if node.js: var fmt = require("pystringformat").pystringformat;
-    
+    var fmt = require("pystringformat");
+    // if loaded bare-bone into a browser:
+    //    var fmt = window.pystringformat;
+
     fmt("Hello, {}", "world");  // "Hello, world"
     fmt("{0:d} in decimal is {0:x} in hexadecimal. ", 32);  // "32 in decimal is 20 in hexadecimal. "
     fmt("There are only {0:b} types of people...", 2);  // "There are only 10 types of people..."
     fmt("Numbers can be padded {:6d}", 123); // "Numbers can be padded    123"
     fmt("{0} plus {0} equals {1}", "two", "four");  // "two plus two equals four"
     fmt("{:.4f}", 1.232));  // "1.2320";
-    fmt("{:10.4f}", 1.232);  // "    1.2320"    
-    
+    fmt("{:10.4f}", 1.232);  // "    1.2320"
+
     fmt("{a.x}", {a: {x: 2}});             // 2
     fmt("{a.b[1]}", {a: {b: [1, 2, 3]}})); // 2
 
@@ -51,6 +52,11 @@ If the argument after the format string is one Object it can be used as a dictio
 * Bracket and dot notations are interchangeable (javascript only has one type of properties)
 
 ## Changelog
+
+### Version 0.3.0
+
+A small cleanup years later, April 2017.
+Exporting function like a standard node module now, and window.pystringformat export only happens when loaded in a browser. Got rid of Bower and Grunt (kind of overkill for this) and replaced jasmine with mocha.
 
 ### Version 0.2.2
 
