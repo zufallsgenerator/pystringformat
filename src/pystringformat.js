@@ -41,8 +41,8 @@
 /*global window*/
 (function(module) {
     "use strict";
-    let DEFAULT_FIXEDPOINT_DIGITS = 6,
-        FORMATTERS;
+    let DEFAULT_FIXEDPOINT_DIGITS = 6;
+    let FORMATTERS;
 
     function isInteger(n) {
         return Math.round(n) === n;
@@ -125,10 +125,11 @@
      * @private
      */
     function _integerFormatter(i, padding, base, code) {
-        let paddingChar = "",
-            firstPaddingChar = "",
-            neg = i < 0,
-            str, len;
+        let paddingChar = "";
+        let firstPaddingChar = "";
+        let neg = i < 0;
+        let str;
+        let len;
         if (typeof i === "boolean") {
             if (i) {
                 i = 1;
@@ -187,7 +188,11 @@
     }
 
     function _getFixedpointPadding(padding) {
-        let strInt, strFract, intPart, fractPart, ret;
+        let strInt;
+        let strFract;
+        let intPart;
+        let fractPart;
+        let ret;
 
         ret = splitStrNumberByDot(padding);
         strInt = ret[0];
@@ -213,10 +218,16 @@
     }
 
     function fixedpointFormatter(f, padding, ispercentage) {
-        let neg = f < 0,
-            paddingChar,
-            firstPaddingChar = "",
-            ret, str, intPart, fractPart, strRet, totalLen, numFractionalDigits;
+        let neg = f < 0;
+        let paddingChar;
+        let firstPaddingChar = "";
+        let ret;
+        let str;
+        let intPart;
+        let fractPart;
+        let strRet;
+        let totalLen;
+        let numFractionalDigits;
 
         ret = _getFixedpointPadding(padding);
         totalLen = ret[0];
@@ -336,8 +347,9 @@
     }
 
     function formatArgument(arg, spec) {
-        let code = spec.substr(spec.length - 1),
-            padding, formatter;
+        let code = spec.substr(spec.length - 1);
+        let padding;
+        let formatter;
 
         if (spec === "" || strIsDigits(code)) {
             padding = spec;
@@ -364,8 +376,11 @@
     }
 
     function getByPath(dict, path) {
-        let obj = dict,
-            i, key, split, origPath = path;
+        let obj = dict;
+        let i;
+        let key;
+        let split;
+        let origPath = path;
         // Remove ending ] and dots
         path = path.replace(/\]$/, "").replace(/[\[\]]+/g, ".");
         split = path.split(".");
@@ -406,13 +421,19 @@
      * Entry function
      */
     function fmt() {
-        var str = arguments[0],
-            dict = arguments[1],
-            numArgs = arguments.length - 1,
-            regexp = new RegExp("{[^}]*}", "g"),
-            split = str.split("{"),
-            arr = [split[0]],
-            matches, m, tokenSplit, after, i, argType, subst;
+        var str = arguments[0];
+        var dict = arguments[1];
+        var numArgs = arguments.length - 1;
+        var regexp = new RegExp("{[^}]*}", "g");
+        var split = str.split("{");
+        var arr = [split[0]];
+        var matches;
+        var m;
+        var tokenSplit;
+        var after;
+        var i;
+        var argType;
+        var subst;
 
         matches = str.match(regexp);
 
