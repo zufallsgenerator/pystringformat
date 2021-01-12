@@ -90,6 +90,15 @@
         }
         return !str.match(/[^0-9]/);
     }
+
+    function ensureNumber(value, variableName) {
+      if (typeof value !== 'number') {
+        throw new Error(`${value} is not a number${variableName ? ' (' + variableName + ')' : ''}`);
+      }
+      if (isNaN(value)) {
+        throw new Error(`${value} is NaN${variableName ? ' (' + variableName + ')' : ''}`);
+      }
+    }
     /**
      * @param {string} str
      * @param {number} length
@@ -97,6 +106,12 @@
      * @private
      */
     function padRight(str, length, ch = " ") {
+      ensureNumber(str.length, 'str.length');
+      ensureNumber(length, 'length');
+      if (ch.length === 0) {
+        throw new Error('Cannot have padding with length 0!');
+      }
+      
         while (str.length < length) {
             str = str + ch;
         }
@@ -109,6 +124,11 @@
      * @private
      */
     function padLeft(str, length, ch = " ") {
+      ensureNumber(str.length, 'str.length');
+      ensureNumber(length, 'length');
+      if (ch.length === 0) {
+        throw new Error('Cannot have padding with length 0!');
+      }
         while (str.length < length) {
             str = ch + str;
         }
@@ -125,7 +145,7 @@
      * @private
      */
     function _integerFormatter(i, padding, base, code) {
-        let paddingChar = "",
+        let paddingChar = " ",
             firstPaddingChar = "",
             neg = i < 0,
             str, len;
@@ -158,7 +178,7 @@
             str = `+${str}`;
             paddingChar = " ";
         }
-        len = parseInt(padding, 10);
+        len = parseInt(padding, 10) || 0;
         if (neg) {
             if (firstPaddingChar === "+") {
                 throw `Invalid specification '${padding}' for negative number`;
@@ -276,12 +296,12 @@
         if (!isPaddingOK(padding)) {
             throw `Invalid specification '${padding}' for 's' format code`;
         }
-        return padRight(String(s), parseInt(padding, 10));
+        return padRight(String(s), parseInt(padding, 10) || 0);
     }
 
     function charFormatter(c, padding) {
         assertIsInteger(c, 'x');
-        return padLeft(String.fromCharCode(c), parseInt(padding, 10));
+        return padLeft(String.fromCharCode(c), parseInt(padding, 10) || 0);
     }
 
     function percentageFormatter(p, padding) {
