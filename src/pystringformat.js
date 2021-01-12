@@ -41,7 +41,7 @@
 /*global window*/
 (function(module) {
     "use strict";
-    var DEFAULT_FIXEDPOINT_DIGITS = 6,
+    let DEFAULT_FIXEDPOINT_DIGITS = 6,
         FORMATTERS;
 
     function isInteger(n) {
@@ -49,7 +49,7 @@
     }
 
     function strBefore(str, delim) {
-        var i = str.indexOf(delim);
+        const i = str.indexOf(delim);
         if (i === -1) {
             return null;
         }
@@ -57,7 +57,7 @@
     }
 
     function strAfter(str, delim) {
-        var i = str.indexOf(delim);
+        const i = str.indexOf(delim);
         if (i === -1) {
             return null;
         }
@@ -75,7 +75,7 @@
      * @returns {boolean}
      */
     function isPaddingOK(str) {
-        var firstChar;
+        let firstChar;
         if (str === "") {
             return true;
         }
@@ -127,7 +127,7 @@
      * @private
      */
     function _integerFormatter(i, padding, base, code) {
-        var paddingChar = "",
+        let paddingChar = "",
             firstPaddingChar = "",
             neg = i < 0,
             str, len;
@@ -189,7 +189,7 @@
     }
 
     function _getFixedpointPadding(padding) {
-        var strInt, strFract, intPart, fractPart, ret;
+        let strInt, strFract, intPart, fractPart, ret;
 
         ret = splitStrNumberByDot(padding);
         strInt = ret[0];
@@ -215,7 +215,7 @@
     }
 
     function fixedpointFormatter(f, padding, ispercentage) {
-        var neg = f < 0,
+        let neg = f < 0,
             paddingChar,
             firstPaddingChar = "",
             ret, str, intPart, fractPart, strRet, totalLen, numFractionalDigits;
@@ -321,7 +321,7 @@
     }
 
     function getDefaultFormatterForValue(value) {
-        var type = typeof value;
+        const type = typeof value;
         if (type === "boolean" || type === "object" || type === "string") {
             return "s";
         }
@@ -338,7 +338,7 @@
     }
 
     function formatArgument(arg, spec) {
-        var code = spec.substr(spec.length - 1),
+        let code = spec.substr(spec.length - 1),
             padding, formatter;
 
         if (spec === "" || strIsDigits(code)) {
@@ -356,7 +356,7 @@
     }
 
     function formatMatch(m, arg) {
-        var spec;
+        let spec;
         spec = strAfter(m, ":");
         if (spec) {
             return formatArgument(arg, spec);
@@ -366,7 +366,7 @@
     }
 
     function getByPath(dict, path) {
-        var obj = dict,
+        let obj = dict,
             i, key, split, origPath = path;
         // Remove ending ] and dots
         path = path.replace(/\]$/, "").replace(/[\[\]]+/g, ".");
@@ -386,7 +386,7 @@
     }
 
     function getPos(str) {
-        var beforeColon = str.split(":")[0];
+        const beforeColon = str.split(":")[0];
         if (beforeColon.length === 0 || !strIsDigits(beforeColon)) {
             throw 'Expected positional arguments';
         }
@@ -394,7 +394,7 @@
     }
 
     function getArgTypeFromMatch(str) {
-        var stripped = str.replace("{", "").replace("}", "").split(":")[0];
+        const stripped = str.replace("{", "").replace("}", "").split(":")[0];
         if (stripped.length === 0) {
             return "simple";
         }

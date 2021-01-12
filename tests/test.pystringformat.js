@@ -1,10 +1,10 @@
 describe("pystringformat", function() {
-  var fmt = require('../src/pystringformat');
-  var expect = require('expect');
+  const fmt = require('../src/pystringformat');
+  const expect = require('expect');
 
   // Test that arguments to fmt throws an error
   function shouldThrow() {
-    var args = arguments;
+    const args = arguments;
     expect(function() {
       fmt.apply(fmt, args);
     }).toThrow();
