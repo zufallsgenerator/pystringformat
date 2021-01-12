@@ -66,7 +66,7 @@
 
     function assertIsInteger(n, code) {
         if (Math.round(n) !== n) {
-            throw "Got '" + n + "' of type '" + typeof n + "' but expected an integer" + (code ? " for code '" + code + "'" : "");
+            throw `Got '${n}' of type '${typeof n}' but expected an integer${code ? ` for code '${code}'` : ""}`;
         }
     }
 
@@ -138,7 +138,7 @@
         }
 
         if (!isPaddingOK(padding)) {
-            throw "Invalid specification '" + padding + (code ? "' for '" + code + "' format code" : "");
+            throw `Invalid specification '${padding}${code ? `' for '${code}' format code` : ""}`;
         }
 
         assertIsInteger(i, code);
@@ -155,18 +155,18 @@
             paddingChar = "0";
         }
         if (firstPaddingChar === "+") {
-            str = "+" + str;
+            str = `+${str}`;
             paddingChar = " ";
         }
         len = parseInt(padding, 10);
         if (neg) {
             if (firstPaddingChar === "+") {
-                throw "Invalid specification '" + padding + "' for negative number";
+                throw `Invalid specification '${padding}' for negative number`;
             }
             if (paddingChar === "0") {
-                return "-" + padLeft(str, len - 1, paddingChar);
+                return `-${padLeft(str, len - 1, paddingChar)}`;
             } else {
-                return padLeft("-" + str, len, paddingChar);
+                return padLeft(`-${str}`, len, paddingChar);
             }
         } else {
             return padLeft(str, len, paddingChar);
@@ -194,7 +194,7 @@
         strFract = ret[1];
 
         if (!isPaddingOK(strInt)) {
-            throw "Invalid specification '" + padding + "'";
+            throw `Invalid specification '${padding}'`;
         }
 
         if (strInt && strInt.length > 0) {
@@ -239,7 +239,7 @@
         fractPart = ret[1];
 
         if (fractPart) {
-            strRet = intPart + "." + fractPart;
+            strRet = `${intPart}.${fractPart}`;
         } else {
             strRet = intPart;
         }
@@ -260,12 +260,12 @@
         }
         if (neg) {
             if (firstPaddingChar === "+") {
-                throw "Invalid specification '" + padding + "' for negative number";
+                throw `Invalid specification '${padding}' for negative number`;
             }
             if (paddingChar === "0") {
-                return "-" + padLeft(strRet, totalLen - 1, paddingChar);
+                return `-${padLeft(strRet, totalLen - 1, paddingChar)}`;
             } else {
-                return padLeft("-" + strRet, totalLen, paddingChar);
+                return padLeft(`-${strRet}`, totalLen, paddingChar);
             }
         } else {
             return padLeft(strRet, totalLen, paddingChar);
@@ -274,7 +274,7 @@
 
     function stringFormatter(s, padding) {
         if (!isPaddingOK(padding)) {
-            throw "Invalid specification '" + padding + "' for 's' format code";
+            throw `Invalid specification '${padding}' for 's' format code`;
         }
         return padRight(String(s), parseInt(padding, 10));
     }
@@ -286,9 +286,9 @@
 
     function percentageFormatter(p, padding) {
         if (typeof p !== "number") {
-            throw "Can only format numbers with '%' code, got '" + p + "' of type '" + typeof p + "'";
+            throw `Can only format numbers with '%' code, got '${p}' of type '${typeof p}'`;
         }
-        return fixedpointFormatter(p * 100, padding, true) + "%";
+        return `${fixedpointFormatter(p * 100, padding, true)}%`;
     }
 
     FORMATTERS = {
@@ -348,7 +348,7 @@
 
         formatter = FORMATTERS[code];
         if (!formatter) {
-            throw "Unknown format specification '" + spec + "'";
+            throw `Unknown format specification '${spec}'`;
         }
         return formatter(arg, padding);
     }
@@ -372,7 +372,7 @@
         for (i = 0; i < split.length; i++) {
             key = split[i];
             if (!obj.hasOwnProperty(key)) {
-                throw "Key/path '" + origPath + "' not in dict ";
+                throw `Key/path '${origPath}' not in dict `;
             }
             obj = obj[key];
         }
