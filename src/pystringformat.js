@@ -96,8 +96,7 @@
      * @param {string=} ch
      * @private
      */
-    function padRight(str, length, ch) {
-        ch = ch || " ";
+    function padRight(str, length, ch = " ") {
         while (str.length < length) {
             str = str + ch;
         }
@@ -109,8 +108,7 @@
      * @param {string=} ch
      * @private
      */
-    function padLeft(str, length, ch) {
-        ch = ch || " ";
+    function padLeft(str, length, ch = " ") {
         while (str.length < length) {
             str = ch + str;
         }
